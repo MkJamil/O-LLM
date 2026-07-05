@@ -1,24 +1,27 @@
 import ollama
 
-user_prompt = "What is the capital"
-system_instruction = "You are a American citizen"
+saved_context = None
 
-response = ollama.chat(
-    model='llama3',
-    messages=[
-        {
-            'role': 'system', 
-            'content': system_instruction  # Your Instructions go here
-        },
-        {
-            'role': 'user', 
-            'content': user_prompt
+print("--- Chat Started (Type 'exit' to quit) ---")
+
+while True:
+    user_input = input("\nYou: ")
+    if user_input.lower() == 'exit':
+        break
+
+    response = ollama.generate(
+        model='llama3',
+        prompt=user_input,
+        context=saved_context,
+        options={
+            'temperature': 0.2,
+            'top_p': 1.0,
+            'top_k': 100,
+            'num_ctx': 4096
         }
-    ],
-    options={
-        'temperature': 0.7,
-        'num_predict': 150,
-    }
-)
+    )
 
-print(response['message']['content'])
+    print(f"\nAI: {response['response']}")
+
+
+    saved_context = response['context']
