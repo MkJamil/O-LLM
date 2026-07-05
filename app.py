@@ -1,6 +1,6 @@
 import ollama
 
-user_prompt = "What is the capital?"
+user_prompt = "What is the capital"
 system_instruction = "You are a American citizen"
 
 response = ollama.chat(
