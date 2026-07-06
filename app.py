@@ -25,3 +25,5 @@ while True:
 
 
     saved_context = response['context']
+
+#Tested prompt engineering with 5 different prompts with different paramateres
