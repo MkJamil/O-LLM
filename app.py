@@ -1,4 +1,7 @@
 import ollama
+from ollama import Client
+
+client = Client(host='http://localhost:11434')
 
 saved_context = None
 
@@ -9,7 +12,7 @@ while True:
     if user_input.lower() == 'exit':
         break
 
-    response = ollama.generate(
+    response = client.generate(
         model='llama3',
         prompt=user_input,
         context=saved_context,
