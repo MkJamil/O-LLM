@@ -13,14 +13,16 @@ while True:
         break
 
     response = client.generate(
-        model='llama3',
+        model='qwen2.5:0.5b',
         prompt=user_input,
         context=saved_context,
         options={
             'temperature': 0.6,
             'top_p': 1.0,
             'top_k': 100,
-            'num_ctx': 4096
+            'num_ctx': 1024,
+            'num_thread': 8,
+            'low_vram': True,
         }
     )
 
