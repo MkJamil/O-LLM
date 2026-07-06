@@ -14,7 +14,7 @@ while True:
         prompt=user_input,
         context=saved_context,
         options={
-            'temperature': 0.2,
+            'temperature': 0.6,
             'top_p': 1.0,
             'top_k': 100,
             'num_ctx': 4096
