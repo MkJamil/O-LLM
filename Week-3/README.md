@@ -1,4 +1,4 @@
-# AI Code Reviewer & Refactoring Assistant
+# RefactorAI — AI Code Reviewer & Refactoring Assistant
 
 A lightweight, local developer tool designed to review, optimize, and refactor code snippets using structured AI feedback.
 
@@ -6,7 +6,7 @@ A lightweight, local developer tool designed to review, optimize, and refactor c
 
 ## 🌟 Overview
 
-The **AI Code Reviewer** helps developers quickly inspect their code for bugs, performance bottlenecks, and un-Pythonic patterns. It provides clear, educational breakdowns alongside clean, production-ready refactored code without introducing unnecessary third-party dependencies.
+The **RefactorAI** assistant helps developers quickly inspect their code for bugs, performance bottlenecks, and un-Pythonic patterns. It provides clear, educational breakdowns alongside clean, production-ready refactored code without introducing unnecessary third-party dependencies.
 
 ---
 
@@ -23,13 +23,19 @@ The **AI Code Reviewer** helps developers quickly inspect their code for bugs, p
 
 * **Frontend:** HTML5, Vanilla JavaScript (ES6+)
 * **Styling:** Tailwind CSS (via CDN)
-* **Execution Environment:** Local Python HTTP Server
+* **Execution Environment:** Web Browser / Python HTTP Server
 
 ---
 
 ## ⚡ Quick Start
 
 1. **Clone the Repository:**
-   ```bash
-   git clone <your-repository-url>
-   cd <your-repository-folder>
+   `git clone https://github.com/MkJamil/O-LLM.git`
+   `cd O-LLM/Week-3`
+
+2. **Open the App:**
+   Simply double-click `index.html` (or open it directly in any web browser).
+
+   *(Optional)* If you have Python installed, run a local server:
+   `python -m http.server 8000`
+   Then open `http://localhost:8000` in your browser.
