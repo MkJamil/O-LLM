@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RefactorAI — Code Review Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    body { margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    /* Hide scrollbar for presets */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 flex flex-col font-sans overflow-hidden">
+  <!-- Visual Metrics Header -->
+  <div class="bg-indigo-900/40 border-b border-indigo-500/20 px-6 py-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-indigo-300 font-bold shrink-0">
+    <div class="flex gap-6">
+      <span class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div> Node: US-East-1</span>
+      <span>Refactoring Speed: ~120ms</span>
+    </div>
+    <div class="flex gap-6 hidden sm:flex">
+      <span>Rules Active: 4/4</span>
+      <span class="text-emerald-400">Python StdLib Enforced</span>
+    </div>
+  </div>
+
+  <div class="flex-1 w-full px-4 py-4 flex flex-col gap-4 min-h-0">
+    <!-- Header Section -->
+    <header class="shrink-0 flex items-center justify-between bg-zinc-900/50 border border-zinc-800 rounded-2xl px-6 py-4">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white leading-tight">RefactorAI</h1>
+          <p class="text-xs text-zinc-500">v3.0.0 — Enterprise Engine</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="settingsBtn" class="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer" title="Settings">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+        <button class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm font-medium transition-all text-white cursor-pointer">
+          Email
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Layout Grid -->
+    <main class="flex-1 grid grid-cols-12 lg:grid-rows-6 gap-4 min-h-0 overflow-y-auto lg:overflow-hidden pb-6 lg:pb-0">
+      
+      <!-- Workspace File Explorer (Sidebar) -->
+      <aside class="col-span-12 lg:col-span-3 lg:row-span-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col overflow-hidden min-h-[250px] lg:min-h-0">
+        <div class="px-4 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-950 relative shrink-0">
+          <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500">Workspace</h2>
+          <button class="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+            Upload Files
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-3 flex flex-col gap-1 text-sm font-mono select-none">
+          <div class="flex items-center gap-2 px-2 py-1.5 text-zinc-400 rounded transition-colors">
+            <span class="text-indigo-400">📁</span>
+            <span class="font-bold text-zinc-300">src/</span>
+          </div>
+          <div class="flex items-center gap-2 px-2 py-1.5 ml-4 bg-indigo-600/10 text-indigo-300 rounded cursor-pointer transition-colors file-item" data-preset="loop">
+            <span class="text-zinc-500">📄</span>
+            <span>main.py</span>
+          </div>
+          <div class="flex items-center gap-2 px-2 py-1.5 ml-4 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300 rounded cursor-pointer transition-colors file-item" data-preset="calc">
+            <span class="text-zinc-500">📄</span>
+            <span>utils.py</span>
+          </div>
+          <div class="flex items-center gap-2 px-2 py-1.5 ml-4 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300 rounded cursor-pointer transition-colors file-item" data-preset="memory">
+            <span class="text-zinc-500">📄</span>
+            <span>config.py</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Input Area (Middle Column) -->
+      <section class="col-span-12 lg:col-span-4 lg:row-span-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col overflow-hidden min-h-[400px] lg:min-h-0">
+        <!-- IDE Window Header -->
+        <div class="px-4 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-950 relative">
+          <div class="flex gap-1.5">
+            <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+          </div>
+          <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 absolute left-1/2 -translate-x-1/2 hidden sm:block">Target Python Snippet</h2>
+        </div>
+        
+        <!-- Interactive Presets -->
+        <div class="px-4 py-2 border-b border-zinc-800 bg-zinc-900/50 flex gap-2 overflow-x-auto hide-scrollbar shrink-0">
+          <button class="preset-btn px-3 py-1.5 bg-indigo-600 text-[10px] uppercase tracking-wider text-white rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="loop">Un-Pythonic Loop</button>
+          <button class="preset-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-[10px] uppercase tracking-wider text-zinc-300 rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="calc">Redundant Calculations</button>
+          <button class="preset-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-[10px] uppercase tracking-wider text-zinc-300 rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="memory">Memory Leak</button>
+        </div>
+
+        <div class="flex-1 flex bg-zinc-950/50 overflow-hidden relative">
+          <!-- Line Numbers -->
+          <div class="w-10 bg-zinc-950 border-r border-zinc-800 py-4 flex flex-col items-end px-2 text-xs font-mono text-zinc-600 select-none overflow-hidden" id="lineNumbers">
+            1
+          </div>
+          <textarea id="codeInput" class="flex-1 w-full bg-transparent p-4 font-mono text-sm text-zinc-300 leading-relaxed focus:outline-none resize-none whitespace-pre overflow-auto" spellcheck="false" placeholder="Paste unoptimized Python code here..."></textarea>
+        </div>
+        <div class="p-4 border-t border-zinc-800 bg-zinc-900/80 shrink-0">
+          <button id="refactorBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            Run RefactorAI
+          </button>
+        </div>
+      </section>
+
+      <!-- Output Engine (Bento Grid Right) -->
+      <div class="col-span-12 lg:col-span-5 lg:row-span-6 flex flex-col gap-4 min-h-[500px] lg:min-h-0 relative" id="outputContainer">
+        <!-- Idle State -->
+        <section id="idleState" class="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col items-center justify-center p-10 z-10">
+          <div class="flex flex-col items-center gap-4">
+            <span id="statusBadge" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Status: Ready</span>
+            <p id="statusMsg" class="text-sm text-zinc-500 text-center">
+              Select a preset or paste code, then press <strong class="text-zinc-400">"Run RefactorAI"</strong>.
+            </p>
+          </div>
+        </section>
+
+        <!-- Results Panel (Initially hidden) -->
+        <div id="resultsPanel" class="flex flex-col gap-4 h-full hidden opacity-0 transition-opacity duration-500">
+          <!-- 1. Overview & Approach -->
+          <section class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 shrink-0">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3">1. Overview & Approach</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Analysis</p>
+                <p id="analysisText" class="text-sm text-zinc-300 leading-snug"></p>
+              </div>
+              <div class="space-y-2">
+                <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Optimization Strategy</p>
+                <p id="strategyText" class="text-sm text-zinc-300 leading-snug"></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. Production Code -->
+          <section class="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col min-h-[250px] relative overflow-hidden">
+            <div class="px-5 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-900 shrink-0">
+              <h3 class="text-xs font-bold uppercase tracking-widest text-indigo-400">2. Production Code</h3>
+              <button id="copyBtn" class="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <span id="copyBtnText">Copy Code</span>
+              </button>
+            </div>
+            <div class="flex-1 bg-zinc-950 p-6 font-mono text-xs overflow-auto relative">
+              <pre id="productionCode" class="m-0 whitespace-pre"></pre>
+            </div>
+            <div class="px-5 py-2 border-t border-zinc-800 bg-zinc-900/50 flex justify-between shrink-0">
+              <span class="text-[10px] text-zinc-500 font-mono" id="charCount">Characters: 0</span>
+              <span class="text-[10px] text-emerald-500 font-mono" id="execTime">Execution: ~0.001ms</span>
+            </div>
+          </section>
+
+          <!-- Bottom Row: 3. Verification & Performance -->
+          <div class="grid grid-cols-1 sm:grid-cols-7 gap-4 shrink-0">
+            <!-- 3. Verification & Key Takeaways -->
+            <section class="sm:col-span-4 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col justify-center">
+              <h3 class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-1">3. Verification</h3>
+              <p id="verificationText" class="text-xs text-zinc-400 italic"></p>
+            </section>
+
+            <!-- Performance Metrics Bento -->
+            <section class="sm:col-span-3 bg-indigo-600 rounded-2xl p-4 flex flex-col justify-between shadow-xl shadow-indigo-900/20">
+              <div class="flex justify-between items-start mb-4 sm:mb-0">
+                <span class="text-[10px] font-bold text-indigo-200 uppercase">Complexity</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigo-200" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+              </div>
+              <div class="flex items-end justify-between">
+                <span id="complexityMetric" class="text-2xl font-bold text-white leading-none">O(1)</span>
+                <span id="complexityScale" class="text-[10px] text-indigo-200 uppercase tracking-widest">Constant</span>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="shrink-0 flex justify-between items-center px-4 py-2 border-t border-zinc-800 text-[10px] text-zinc-600 uppercase tracking-widest">
+      <span>RefactorAI Framework &bull; Deployment Instance 099-A</span>
+      <span class="flex gap-4">
+        <a href="#" class="hover:text-zinc-400 hidden sm:inline-block">Documentation</a>
+        <a href="#" class="hover:text-zinc-400 hidden sm:inline-block">API Status</a>
+        <a href="#" class="hover:text-zinc-400">&copy; 2024</a>
+      </span>
+    </footer>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" id="modalBackdrop"></div>
+    <div class="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="modalContent">
+      <div class="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-100">Engine Settings</h2>
+        <button id="closeModalBtn" class="text-zinc-400 hover:text-white transition-colors cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-5">
+        <div class="space-y-2">
+          <label for="apiKeyInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Gemini API Key</label>
+          <input type="password" id="apiKeyInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="AIzaSy..." />
+          <p class="text-[10px] text-zinc-500">Stored locally in your browser. Optional for offline mock mode.</p>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <label for="tempInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Model Temperature</label>
+            <span id="tempValueDisplay" class="text-xs font-mono text-indigo-400">0.7</span>
+          </div>
+          <input type="range" id="tempInput" min="0" max="1" step="0.1" value="0.7" class="w-full accent-indigo-500 cursor-pointer" />
+          <div class="flex justify-between text-[10px] text-zinc-500 uppercase">
+            <span>Precise</span>
+            <span>Creative</span>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-zinc-800 bg-zinc-950 flex justify-end gap-3">
+        <button id="cancelModalBtn" class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-colors cursor-pointer">Cancel</button>
+        <button id="saveSettingsBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-lg shadow-indigo-600/20 cursor-pointer">Save Configurations</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const presets = {
+      loop: {
+        code: "def get_even_numbers(numbers):\n    evens = []\n    for i in range(len(numbers)):\n        if numbers[i] % 2 == 0:\n            evens.append(numbers[i])\n    return evens",
+        analysis: "Identified imperative loop patterns that underutilize Python's list comprehension capabilities. Redundant indexing detected.",
+        strategy: "Implementing a functional approach to reduce instruction cycles and improve readability through PEP 8 standards.",
+        prodCode: 'def get_even_numbers(numbers: list[int]) -> list[int]:\n    """Extract even numbers using optimized list comprehension."""\n    return [num for num in numbers if num % 2 == 0]',
+        verification: '"Gracefully processes empty input lists [] without indexing errors."',
+        complexity: "O(n)",
+        scale: "Linear"
+      },
+      calc: {
+        code: "def calculate_totals(prices):\n    total = 0\n    for p in prices:\n        total = total + p\n    tax = total * 0.2\n    return total + tax",
+        analysis: "Manual accumulation loop used instead of built-in sum() function. Intermediate variables can be optimized.",
+        strategy: "Leverage standard library sum() and combine arithmetic operations for efficiency.",
+        prodCode: 'def calculate_totals(prices: list[float]) -> float:\n    """Calculate total with 20% tax applied."""\n    return sum(prices) * 1.2',
+        verification: '"Utilizes highly-optimized C implementation of sum() in CPython."',
+        complexity: "O(n)",
+        scale: "Linear"
+      },
+      memory: {
+        code: "def process_large_file(filepath):\n    with open(filepath, 'r') as f:\n        data = f.read()\n    lines = data.split('\\n')\n    for line in lines:\n        print(line)",
+        analysis: "Entire file content loaded into memory at once using read(), risking OutOfMemory errors for large files.",
+        strategy: "Implement a lazy generator pattern using file object iteration to stream data line-by-line.",
+        prodCode: 'def process_large_file(filepath: str) -> None:\n    """Stream file line-by-line to minimize memory footprint."""\n    with open(filepath, \'r\') as f:\n        for line in f:\n            print(line.rstrip(\'\\n\'))',
+        verification: '"Memory usage remains constant O(1) regardless of file size."',
+        complexity: "O(1)",
+        scale: "Constant"
+      }
+    };
+
+    let currentPreset = presets.loop;
+
+    const codeInput = document.getElementById('codeInput');
+    const lineNumbers = document.getElementById('lineNumbers');
+    const refactorBtn = document.getElementById('refactorBtn');
+    const idleState = document.getElementById('idleState');
+    const resultsPanel = document.getElementById('resultsPanel');
+    const statusBadge = document.getElementById('statusBadge');
+    const statusMsg = document.getElementById('statusMsg');
+    
+    // Output Elements
+    const analysisText = document.getElementById('analysisText');
+    const strategyText = document.getElementById('strategyText');
+    const productionCode = document.getElementById('productionCode');
+    const verificationText = document.getElementById('verificationText');
+    const complexityMetric = document.getElementById('complexityMetric');
+    const complexityScale = document.getElementById('complexityScale');
+    const charCount = document.getElementById('charCount');
+    const copyBtn = document.getElementById('copyBtn');
+    const originalCopyIcon = copyBtn.innerHTML;
+
+    // Set initial text
+    codeInput.value = currentPreset.code;
+
+    // Update Line Numbers
+    const updateLineNumbers = () => {
+      const lines = codeInput.value.split('\n').length;
+      lineNumbers.innerHTML = Array(Math.max(1, lines)).fill(0).map((_, i) => i + 1).join('<br/>');
+    };
+
+    // Sync scroll between textarea and line numbers
+    codeInput.addEventListener('scroll', () => {
+      lineNumbers.scrollTop = codeInput.scrollTop;
+    });
+
+    codeInput.addEventListener('input', updateLineNumbers);
+
+    // Syntax Highlighting (Basic Regex Replace for Demo)
+    const highlightPython = (code) => {
+      let escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return escaped
+        .replace(/\b(\d+\.?\d*)\b/g, '<span class="text-orange-400">$1</span>')
+        .replace(/"""([\s\S]*?)"""/g, '<span class="text-zinc-500 italic">"""$1"""</span>')
+        .replace(/\b(def|return|for|in|if|with|as)\b/g, '<span class="text-purple-400">$1</span>')
+        .replace(/\b(sum|list|int|float|str|print|open)\b/g, '<span class="text-blue-400">$1</span>');
+    };
+
+    // Handle Presets and File Explorer clicks
+    const setActivePreset = (type) => {
+      currentPreset = presets[type];
+      codeInput.value = currentPreset.code;
+      updateLineNumbers();
+      
+      // Visual feedback for active preset buttons
+      document.querySelectorAll('.preset-btn').forEach(b => {
+        if (b.dataset.preset === type) {
+          b.classList.remove('bg-zinc-800', 'text-zinc-300');
+          b.classList.add('bg-indigo-600', 'text-white');
+        } else {
+          b.classList.remove('bg-indigo-600', 'text-white');
+          b.classList.add('bg-zinc-800', 'text-zinc-300');
+        }
+      });
+
+      // Visual feedback for file explorer items
+      document.querySelectorAll('.file-item').forEach(f => {
+        if (f.dataset.preset === type) {
+          f.classList.remove('text-zinc-400', 'hover:bg-zinc-800/50', 'hover:text-zinc-300');
+          f.classList.add('bg-indigo-600/10', 'text-indigo-300');
+        } else {
+          f.classList.remove('bg-indigo-600/10', 'text-indigo-300');
+          f.classList.add('text-zinc-400', 'hover:bg-zinc-800/50', 'hover:text-zinc-300');
+        }
+      });
+    };
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => setActivePreset(e.target.dataset.preset));
+    });
+
+    document.querySelectorAll('.file-item').forEach(item => {
+      item.addEventListener('click', (e) => setActivePreset(e.currentTarget.dataset.preset));
+    });
+
+    // Copy Code functionality
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(currentPreset.prodCode);
+      copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg><span class="text-emerald-400 font-bold uppercase tracking-wider text-[10px]">Copied!</span>';
+      setTimeout(() => {
+        copyBtn.innerHTML = originalCopyIcon;
+      }, 2000);
+    });
+
+    // Simulate AI Refactoring
+    refactorBtn.addEventListener('click', () => {
+      if (!codeInput.value.trim()) {
+        alert('Please paste or select a code snippet first!');
+        return;
+      }
+
+      // Hide results, show analyzing
+      resultsPanel.classList.add('hidden', 'opacity-0');
+      idleState.classList.remove('hidden');
+      
+      statusBadge.textContent = "Status: Analyzing Code...";
+      statusBadge.className = "text-[10px] font-bold uppercase tracking-widest text-amber-400 animate-pulse";
+      statusMsg.innerHTML = "Analyzing target snippet...";
+
+      refactorBtn.disabled = true;
+      refactorBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+      setTimeout(() => {
+        idleState.classList.add('hidden');
+        resultsPanel.classList.remove('hidden');
+        
+        // Small delay for fade in
+        setTimeout(() => {
+          resultsPanel.classList.remove('opacity-0');
+        }, 50);
+
+        refactorBtn.disabled = false;
+        refactorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+        // Populate Data
+        analysisText.textContent = currentPreset.analysis;
+        strategyText.textContent = currentPreset.strategy;
+        
+        productionCode.innerHTML = highlightPython(currentPreset.prodCode);
+        
+        verificationText.textContent = currentPreset.verification;
+        complexityMetric.textContent = currentPreset.complexity;
+        complexityScale.textContent = currentPreset.scale;
+        charCount.textContent = `Characters: ${currentPreset.prodCode.length}`;
+        
+      }, 800);
+    });
+
+    // Initialize line numbers
+    updateLineNumbers();
+
+    // --- Modal Logic ---
+    const settingsModal = document.getElementById('settingsModal');
+    const modalContent = document.getElementById('modalContent');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const tempInput = document.getElementById('tempInput');
+    const tempValueDisplay = document.getElementById('tempValueDisplay');
+
+    const loadSettings = () => {
+      const savedKey = localStorage.getItem('geminiApiKey') || '';
+      const savedTemp = localStorage.getItem('geminiTemp') || '0.7';
+      apiKeyInput.value = savedKey;
+      tempInput.value = savedTemp;
+      tempValueDisplay.textContent = parseFloat(savedTemp).toFixed(1);
+    };
+
+    const openModal = () => {
+      loadSettings();
+      settingsModal.classList.remove('hidden');
+      setTimeout(() => {
+        settingsModal.classList.remove('opacity-0');
+        modalContent.classList.remove('scale-95');
+        modalContent.classList.add('scale-100');
+      }, 10);
+    };
+
+    const closeModal = () => {
+      settingsModal.classList.add('opacity-0');
+      modalContent.classList.remove('scale-100');
+      modalContent.classList.add('scale-95');
+      setTimeout(() => {
+        settingsModal.classList.add('hidden');
+      }, 300);
+    };
+
+    tempInput.addEventListener('input', (e) => {
+      tempValueDisplay.textContent = parseFloat(e.target.value).toFixed(1);
+    });
+
+    settingsBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+
+    saveSettingsBtn.addEventListener('click', () => {
+      localStorage.setItem('geminiApiKey', apiKeyInput.value.trim());
+      localStorage.setItem('geminiTemp', tempInput.value);
+      closeModal();
+    });
+
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target.id === 'modalBackdrop') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
