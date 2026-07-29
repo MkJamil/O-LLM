@@ -22,7 +22,7 @@
     </div>
     <div class="flex gap-6 hidden sm:flex">
       <span>Rules Active: 4/4</span>
-      <span class="text-emerald-400">Python StdLib Enforced</span>
+      <span class="text-emerald-400">Best Practices Enforced</span>
     </div>
   </div>
 
@@ -41,6 +41,10 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
+        <button id="githubAuthBtn" class="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs font-bold uppercase tracking-wider transition-all text-zinc-300 cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          <span id="githubStatusText">Connect GitHub</span>
+        </button>
         <button id="settingsBtn" class="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer" title="Settings">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -57,7 +61,7 @@
     <main class="flex-1 grid grid-cols-12 lg:grid-rows-6 gap-4 min-h-0 overflow-y-auto lg:overflow-hidden pb-6 lg:pb-0">
       
       <!-- Workspace File Explorer (Sidebar) -->
-      <aside class="col-span-12 lg:col-span-3 lg:row-span-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col overflow-hidden min-h-[250px] lg:min-h-0">
+      <aside class="col-span-12 lg:col-span-2 lg:row-span-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col overflow-hidden min-h-[250px] lg:min-h-0">
         <div class="px-4 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-950 relative shrink-0">
           <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500">Workspace</h2>
           <button class="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
@@ -71,22 +75,22 @@
             <span class="font-bold text-zinc-300">src/</span>
           </div>
           <div class="flex items-center gap-2 px-2 py-1.5 ml-4 bg-indigo-600/10 text-indigo-300 rounded cursor-pointer transition-colors file-item" data-preset="loop">
-            <span class="text-zinc-500">📄</span>
+            <span class="text-blue-400">📄</span>
             <span>main.py</span>
           </div>
           <div class="flex items-center gap-2 px-2 py-1.5 ml-4 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300 rounded cursor-pointer transition-colors file-item" data-preset="calc">
-            <span class="text-zinc-500">📄</span>
-            <span>utils.py</span>
+            <span class="text-yellow-400">📄</span>
+            <span>utils.js</span>
           </div>
           <div class="flex items-center gap-2 px-2 py-1.5 ml-4 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300 rounded cursor-pointer transition-colors file-item" data-preset="memory">
-            <span class="text-zinc-500">📄</span>
-            <span>config.py</span>
+            <span class="text-cyan-400">📄</span>
+            <span>App.tsx</span>
           </div>
         </div>
       </aside>
 
       <!-- Input Area (Middle Column) -->
-      <section class="col-span-12 lg:col-span-4 lg:row-span-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col overflow-hidden min-h-[400px] lg:min-h-0">
+      <section class="col-span-12 lg:col-span-5 lg:row-span-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col overflow-hidden min-h-[400px] lg:min-h-0">
         <!-- IDE Window Header -->
         <div class="px-4 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-950 relative">
           <div class="flex gap-1.5">
@@ -94,12 +98,30 @@
             <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
             <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
           </div>
-          <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 absolute left-1/2 -translate-x-1/2 hidden sm:block">Target Python Snippet</h2>
+          <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 absolute left-1/2 -translate-x-1/2 hidden sm:flex items-center gap-2">
+            <span id="targetCodeHeader">Target Code Snippet</span>
+            <span id="langBadge" class="bg-indigo-600/20 text-indigo-400 px-1.5 py-0.5 rounded text-[9px] tracking-widest border border-indigo-500/20 hidden"></span>
+          </h2>
         </div>
         
+        <!-- GitHub Selectors -->
+        <div id="githubSelectors" class="px-4 py-3 border-b border-zinc-800 bg-zinc-950 flex flex-col gap-3 shrink-0 hidden">
+          <div class="flex gap-2">
+            <select id="githubRepoSelect" class="bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] uppercase tracking-wider font-bold rounded px-2 py-1.5 flex-1 focus:outline-none focus:border-indigo-500 cursor-pointer">
+              <option value="">Select Repository...</option>
+            </select>
+            <select id="githubBranchSelect" class="bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] uppercase tracking-wider font-bold rounded px-2 py-1.5 w-1/3 focus:outline-none focus:border-indigo-500 cursor-pointer" disabled>
+              <option value="">Branch...</option>
+            </select>
+          </div>
+          <select id="githubFileSelect" class="bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] uppercase tracking-wider font-bold rounded px-2 py-1.5 w-full focus:outline-none focus:border-indigo-500 cursor-pointer" disabled>
+            <option value="">Select Source File...</option>
+          </select>
+        </div>
+
         <!-- Interactive Presets -->
         <div class="px-4 py-2 border-b border-zinc-800 bg-zinc-900/50 flex gap-2 overflow-x-auto hide-scrollbar shrink-0">
-          <button class="preset-btn px-3 py-1.5 bg-indigo-600 text-[10px] uppercase tracking-wider text-white rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="loop">Un-Pythonic Loop</button>
+          <button class="preset-btn px-3 py-1.5 bg-indigo-600 text-[10px] uppercase tracking-wider text-white rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="loop">Suboptimal Loop</button>
           <button class="preset-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-[10px] uppercase tracking-wider text-zinc-300 rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="calc">Redundant Calculations</button>
           <button class="preset-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-[10px] uppercase tracking-wider text-zinc-300 rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="memory">Memory Leak</button>
         </div>
@@ -109,7 +131,10 @@
           <div class="w-10 bg-zinc-950 border-r border-zinc-800 py-4 flex flex-col items-end px-2 text-xs font-mono text-zinc-600 select-none overflow-hidden" id="lineNumbers">
             1
           </div>
-          <textarea id="codeInput" class="flex-1 w-full bg-transparent p-4 font-mono text-sm text-zinc-300 leading-relaxed focus:outline-none resize-none whitespace-pre overflow-auto" spellcheck="false" placeholder="Paste unoptimized Python code here..."></textarea>
+          <div class="flex-1 relative overflow-hidden bg-zinc-950/50">
+            <pre id="codeHighlight" class="absolute inset-0 p-4 m-0 font-mono text-sm leading-relaxed pointer-events-none whitespace-pre overflow-hidden text-zinc-300"></pre>
+            <textarea id="codeInput" class="absolute inset-0 w-full h-full bg-transparent p-4 font-mono text-sm leading-relaxed focus:outline-none resize-none whitespace-pre overflow-auto text-transparent caret-white" spellcheck="false" placeholder="Paste unoptimized code here..."></textarea>
+          </div>
         </div>
         <div class="p-4 border-t border-zinc-800 bg-zinc-900/80 shrink-0">
           <button id="refactorBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
@@ -160,9 +185,14 @@
             <div class="flex-1 bg-zinc-950 p-6 font-mono text-xs overflow-auto relative">
               <pre id="productionCode" class="m-0 whitespace-pre"></pre>
             </div>
-            <div class="px-5 py-2 border-t border-zinc-800 bg-zinc-900/50 flex justify-between shrink-0">
-              <span class="text-[10px] text-zinc-500 font-mono" id="charCount">Characters: 0</span>
-              <span class="text-[10px] text-emerald-500 font-mono" id="execTime">Execution: ~0.001ms</span>
+            <div class="px-5 py-2 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between shrink-0">
+              <div class="flex gap-4">
+                <span class="text-[10px] text-zinc-500 font-mono" id="charCount">Characters: 0</span>
+                <span class="text-[10px] text-emerald-500 font-mono" id="execTime">Execution: ~0.001ms</span>
+              </div>
+              <button id="pushToGithubBtn" class="hidden items-center gap-1.5 px-3 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 rounded text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
+                <span>Push to GitHub</span>
+              </button>
             </div>
           </section>
 
@@ -236,6 +266,59 @@
     </div>
   </div>
 
+  <!-- GitHub Auth Modal -->
+  <div id="githubModal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" id="githubModalBackdrop"></div>
+    <div class="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="githubModalContent">
+      <div class="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-100 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          GitHub Integration
+        </h2>
+        <button id="closeGithubModalBtn" class="text-zinc-400 hover:text-white transition-colors cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-5">
+        <div class="space-y-2">
+          <label for="githubPatInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Personal Access Token (Classic)</label>
+          <input type="password" id="githubPatInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="ghp_..." />
+          <p class="text-[10px] text-zinc-500">Requires 'repo' scope. Stored locally in your browser.</p>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-zinc-800 bg-zinc-950 flex justify-end gap-3">
+        <button id="cancelGithubModalBtn" class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-colors cursor-pointer">Cancel</button>
+        <button id="saveGithubBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-lg shadow-indigo-600/20 cursor-pointer">Connect Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GitHub Commit Modal -->
+  <div id="commitModal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" id="commitModalBackdrop"></div>
+    <div class="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="commitModalContent">
+      <div class="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-100 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          Push to GitHub
+        </h2>
+        <button id="closeCommitModalBtn" class="text-zinc-400 hover:text-white transition-colors cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-5">
+        <div class="space-y-2">
+          <label for="commitMessageInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Commit Message</label>
+          <input type="text" id="commitMessageInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Refactored using RefactorAI" value="Refactored using RefactorAI" />
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-zinc-800 bg-zinc-950 flex justify-end gap-3">
+        <button id="cancelCommitModalBtn" class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-colors cursor-pointer">Cancel</button>
+        <button id="confirmPushBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-lg shadow-emerald-600/20 cursor-pointer">Confirm Push</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const presets = {
       loop: {
@@ -248,20 +331,20 @@
         scale: "Linear"
       },
       calc: {
-        code: "def calculate_totals(prices):\n    total = 0\n    for p in prices:\n        total = total + p\n    tax = total * 0.2\n    return total + tax",
-        analysis: "Manual accumulation loop used instead of built-in sum() function. Intermediate variables can be optimized.",
-        strategy: "Leverage standard library sum() and combine arithmetic operations for efficiency.",
-        prodCode: 'def calculate_totals(prices: list[float]) -> float:\n    """Calculate total with 20% tax applied."""\n    return sum(prices) * 1.2',
-        verification: '"Utilizes highly-optimized C implementation of sum() in CPython."',
+        code: "function calculateTotals(prices) {\n    let total = 0;\n    for(let i=0; i<prices.length; i++) {\n        total = total + prices[i];\n    }\n    let tax = total * 0.2;\n    return total + tax;\n}",
+        analysis: "Manual loop used instead of array reduce method. Intermediate variables can be optimized.",
+        strategy: "Leverage standard Array.prototype.reduce() and combine arithmetic operations for efficiency.",
+        prodCode: 'export const calculateTotals = (prices) => prices.reduce((sum, p) => sum + p, 0) * 1.2;',
+        verification: '"Utilizes highly-optimized engine implementation of reduce() in V8."',
         complexity: "O(n)",
         scale: "Linear"
       },
       memory: {
-        code: "def process_large_file(filepath):\n    with open(filepath, 'r') as f:\n        data = f.read()\n    lines = data.split('\\n')\n    for line in lines:\n        print(line)",
-        analysis: "Entire file content loaded into memory at once using read(), risking OutOfMemory errors for large files.",
-        strategy: "Implement a lazy generator pattern using file object iteration to stream data line-by-line.",
-        prodCode: 'def process_large_file(filepath: str) -> None:\n    """Stream file line-by-line to minimize memory footprint."""\n    with open(filepath, \'r\') as f:\n        for line in f:\n            print(line.rstrip(\'\\n\'))',
-        verification: '"Memory usage remains constant O(1) regardless of file size."',
+        code: "import React, { useState, useEffect } from 'react';\n\nfunction App() {\n    const [time, setTime] = useState(new Date());\n    useEffect(() => {\n        setInterval(() => setTime(new Date()), 1000);\n    }, []);\n    return <div>{time.toString()}</div>;\n}",
+        analysis: "React useEffect hook sets up an interval but fails to clear it on unmount, causing a memory leak.",
+        strategy: "Return a cleanup function from useEffect to clear the interval upon component unmount.",
+        prodCode: "import React, { useState, useEffect } from 'react';\n\nexport const App = () => {\n  const [time, setTime] = useState(new Date());\n  useEffect(() => {\n    const timer = setInterval(() => setTime(new Date()), 1000);\n    return () => clearInterval(timer);\n  }, []);\n  return <div>{time.toLocaleTimeString()}</div>;\n};",
+        verification: '"Component unmount lifecycle properly disposes of timer closure."',
         complexity: "O(1)",
         scale: "Constant"
       }
@@ -286,6 +369,7 @@
     const complexityScale = document.getElementById('complexityScale');
     const charCount = document.getElementById('charCount');
     const copyBtn = document.getElementById('copyBtn');
+    const codeHighlight = document.getElementById('codeHighlight');
     const originalCopyIcon = copyBtn.innerHTML;
 
     // Set initial text
@@ -300,18 +384,32 @@
     // Sync scroll between textarea and line numbers
     codeInput.addEventListener('scroll', () => {
       lineNumbers.scrollTop = codeInput.scrollTop;
+      codeHighlight.scrollTop = codeInput.scrollTop;
+      codeHighlight.scrollLeft = codeInput.scrollLeft;
     });
 
-    codeInput.addEventListener('input', updateLineNumbers);
+    const updateHighlight = () => {
+      const code = codeInput.value;
+      if (!code) {
+        codeHighlight.innerHTML = '';
+        return;
+      }
+      codeHighlight.innerHTML = highlightCode(code) + (code.endsWith('\n') ? ' ' : '');
+    };
+
+    codeInput.addEventListener('input', () => {
+      updateLineNumbers();
+      updateHighlight();
+    });
 
     // Syntax Highlighting (Basic Regex Replace for Demo)
-    const highlightPython = (code) => {
+    const highlightCode = (code) => {
       let escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       return escaped
         .replace(/\b(\d+\.?\d*)\b/g, '<span class="text-orange-400">$1</span>')
-        .replace(/"""([\s\S]*?)"""/g, '<span class="text-zinc-500 italic">"""$1"""</span>')
-        .replace(/\b(def|return|for|in|if|with|as)\b/g, '<span class="text-purple-400">$1</span>')
-        .replace(/\b(sum|list|int|float|str|print|open)\b/g, '<span class="text-blue-400">$1</span>');
+        .replace(/(["'`])(?:(?=(\\?))\2.)*?\1/g, '<span class="text-emerald-400">$&</span>')
+        .replace(/\b(def|return|for|in|if|with|as|function|const|let|var|class|import|from|export|public|private|protected|package|go|func|chan|struct|impl|match|fn|use)\b/g, '<span class="text-purple-400">$1</span>')
+        .replace(/\b(sum|list|int|float|str|print|open|console|log|String|Integer|System|out|println|fmt|Printf|vec)\b/g, '<span class="text-blue-400">$1</span>');
     };
 
     // Handle Presets and File Explorer clicks
@@ -319,6 +417,21 @@
       currentPreset = presets[type];
       codeInput.value = currentPreset.code;
       updateLineNumbers();
+      updateHighlight();
+
+      const targetCodeHeader = document.getElementById('targetCodeHeader');
+      const langBadge = document.getElementById('langBadge');
+      if (targetCodeHeader && langBadge) {
+        targetCodeHeader.textContent = `Target Code Snippet`;
+        langBadge.classList.remove('hidden');
+        if (type === 'calc') {
+          langBadge.textContent = 'JAVASCRIPT';
+        } else if (type === 'memory') {
+          langBadge.textContent = 'TYPESCRIPT';
+        } else {
+          langBadge.textContent = 'PYTHON';
+        }
+      }
       
       // Visual feedback for active preset buttons
       document.querySelectorAll('.preset-btn').forEach(b => {
@@ -360,9 +473,10 @@
       }, 2000);
     });
 
-    // Simulate AI Refactoring
-    refactorBtn.addEventListener('click', () => {
-      if (!codeInput.value.trim()) {
+    // Simulate or perform AI Refactoring
+    refactorBtn.addEventListener('click', async () => {
+      const codeToRefactor = codeInput.value.trim();
+      if (!codeToRefactor) {
         alert('Please paste or select a code snippet first!');
         return;
       }
@@ -378,11 +492,13 @@
       refactorBtn.disabled = true;
       refactorBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
-      setTimeout(() => {
+      const apiKey = localStorage.getItem('geminiApiKey') || '';
+      const temperature = parseFloat(localStorage.getItem('geminiTemp') || '0.7');
+
+      const renderResults = (data) => {
         idleState.classList.add('hidden');
         resultsPanel.classList.remove('hidden');
         
-        // Small delay for fade in
         setTimeout(() => {
           resultsPanel.classList.remove('opacity-0');
         }, 50);
@@ -390,22 +506,111 @@
         refactorBtn.disabled = false;
         refactorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-        // Populate Data
-        analysisText.textContent = currentPreset.analysis;
-        strategyText.textContent = currentPreset.strategy;
+        analysisText.textContent = data.analysis;
+        strategyText.textContent = data.strategy;
         
-        productionCode.innerHTML = highlightPython(currentPreset.prodCode);
+        productionCode.innerHTML = highlightCode(data.prodCode);
         
-        verificationText.textContent = currentPreset.verification;
-        complexityMetric.textContent = currentPreset.complexity;
-        complexityScale.textContent = currentPreset.scale;
-        charCount.textContent = `Characters: ${currentPreset.prodCode.length}`;
+        verificationText.textContent = data.verification;
+        complexityMetric.textContent = data.complexity;
+        complexityScale.textContent = data.scale;
+        charCount.textContent = `Characters: ${data.prodCode.length}`;
         
-      }, 800);
+        if (githubToken && typeof githubFileSelect !== 'undefined' && githubFileSelect.value) {
+          pushToGithubBtn.classList.remove('hidden');
+          pushToGithubBtn.classList.add('flex');
+        } else {
+          pushToGithubBtn.classList.add('hidden');
+          pushToGithubBtn.classList.remove('flex');
+        }
+      };
+
+      if (apiKey) {
+        try {
+          const fileName = (typeof githubFileSelect !== 'undefined' && !githubFileSelect.disabled && githubFileSelect.value) ? githubFileSelect.value : "unknown";
+          
+          const systemPrompt = `You are an expert AI refactoring engine. 
+1. Auto-detect the target programming language from the provided code snippet or the file name (${fileName}).
+2. Apply language-specific best practices (e.g., PEP 8 for Python, ES6+/Async for JS, C++ memory safety, Idiomatic Go).
+3. Return the response EXCLUSIVELY as a valid JSON object with the following exact keys:
+   - "language": string (detected language name)
+   - "analysis": string (brief summary of current code issues)
+   - "strategy": string (how you will improve it)
+   - "prodCode": string (the fully refactored, production-ready code)
+   - "verification": string (how to test or verify)
+   - "complexity": string (e.g., "O(n)", "O(1)")
+   - "scale": string (e.g., "Enterprise", "Production")
+Do not include any markdown formatting outside the JSON block.`;
+
+          const payload = {
+            contents: [{ parts: [{ text: `Code to refactor:\n\n${codeToRefactor}` }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            generationConfig: {
+              temperature: temperature,
+              responseMimeType: "application/json"
+            }
+          };
+
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          let jsonStr = data.candidates[0].content.parts[0].text;
+          jsonStr = jsonStr.replace(/^```json/m, '').replace(/^```/m, '').replace(/```$/m, '').trim();
+          const parsed = JSON.parse(jsonStr);
+
+          currentPreset = {
+            analysis: parsed.analysis,
+            strategy: parsed.strategy,
+            prodCode: parsed.prodCode,
+            verification: parsed.verification,
+            complexity: parsed.complexity,
+            scale: parsed.scale
+          };
+
+          renderResults(currentPreset);
+
+        } catch (error) {
+          console.error(error);
+          alert('Failed to refactor code using Gemini API. Falling back to mock data if available.');
+          if (currentPreset) {
+            renderResults(currentPreset);
+          } else {
+            idleState.classList.remove('hidden');
+            refactorBtn.disabled = false;
+            refactorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            statusBadge.textContent = "Status: Idle";
+            statusBadge.className = "text-[10px] font-bold uppercase tracking-widest text-zinc-500";
+            statusMsg.innerHTML = "Select a preset or paste code above";
+          }
+        }
+      } else {
+        setTimeout(() => {
+          if (!currentPreset) {
+            alert('No preset selected and no API key provided. Please select a preset for offline mock mode.');
+            idleState.classList.remove('hidden');
+            refactorBtn.disabled = false;
+            refactorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            statusBadge.textContent = "Status: Idle";
+            statusBadge.className = "text-[10px] font-bold uppercase tracking-widest text-zinc-500";
+            statusMsg.innerHTML = "Select a preset or paste code above";
+            return;
+          }
+          renderResults(currentPreset);
+        }, 800);
+      }
     });
 
     // Initialize line numbers
     updateLineNumbers();
+    updateHighlight();
 
     // --- Modal Logic ---
     const settingsModal = document.getElementById('settingsModal');
@@ -464,6 +669,295 @@
         closeModal();
       }
     });
+
+    // --- GitHub Logic ---
+    const githubAuthBtn = document.getElementById('githubAuthBtn');
+    const githubStatusText = document.getElementById('githubStatusText');
+    const githubModal = document.getElementById('githubModal');
+    const githubModalContent = document.getElementById('githubModalContent');
+    const githubModalBackdrop = document.getElementById('githubModalBackdrop');
+    const closeGithubModalBtn = document.getElementById('closeGithubModalBtn');
+    const cancelGithubModalBtn = document.getElementById('cancelGithubModalBtn');
+    const saveGithubBtn = document.getElementById('saveGithubBtn');
+    const githubPatInput = document.getElementById('githubPatInput');
+
+    const githubSelectors = document.getElementById('githubSelectors');
+    const githubRepoSelect = document.getElementById('githubRepoSelect');
+    const githubBranchSelect = document.getElementById('githubBranchSelect');
+    const githubFileSelect = document.getElementById('githubFileSelect');
+
+    const pushToGithubBtn = document.getElementById('pushToGithubBtn');
+    const commitModal = document.getElementById('commitModal');
+    const commitModalContent = document.getElementById('commitModalContent');
+    const commitModalBackdrop = document.getElementById('commitModalBackdrop');
+    const closeCommitModalBtn = document.getElementById('closeCommitModalBtn');
+    const cancelCommitModalBtn = document.getElementById('cancelCommitModalBtn');
+    const confirmPushBtn = document.getElementById('confirmPushBtn');
+    const commitMessageInput = document.getElementById('commitMessageInput');
+
+    let githubToken = localStorage.getItem('githubToken') || '';
+    let githubUser = null;
+    let githubCurrentSha = null;
+
+    const initGithub = async () => {
+      if (githubToken) {
+        try {
+          const res = await fetch('https://api.github.com/user', {
+            headers: { 'Authorization': `token ${githubToken}` }
+          });
+          if (res.ok) {
+            githubUser = await res.json();
+            githubAuthBtn.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
+            githubAuthBtn.classList.remove('bg-zinc-800', 'text-zinc-300', 'border-zinc-700');
+            githubStatusText.textContent = `Connected: @${githubUser.login}`;
+            githubSelectors.classList.remove('hidden');
+            loadGithubRepos();
+          } else {
+            throw new Error('Invalid token');
+          }
+        } catch (e) {
+          githubToken = '';
+          localStorage.removeItem('githubToken');
+        }
+      }
+    };
+
+    const openGithubModal = () => {
+      githubPatInput.value = githubToken;
+      githubModal.classList.remove('hidden');
+      setTimeout(() => {
+        githubModal.classList.remove('opacity-0');
+        githubModalContent.classList.remove('scale-95');
+        githubModalContent.classList.add('scale-100');
+      }, 10);
+    };
+
+    const closeGithubModal = () => {
+      githubModal.classList.add('opacity-0');
+      githubModalContent.classList.remove('scale-100');
+      githubModalContent.classList.add('scale-95');
+      setTimeout(() => {
+        githubModal.classList.add('hidden');
+      }, 300);
+    };
+
+    githubAuthBtn.addEventListener('click', openGithubModal);
+    closeGithubModalBtn.addEventListener('click', closeGithubModal);
+    cancelGithubModalBtn.addEventListener('click', closeGithubModal);
+    githubModalBackdrop.addEventListener('click', closeGithubModal);
+
+    saveGithubBtn.addEventListener('click', async () => {
+      const token = githubPatInput.value.trim();
+      if (!token) return;
+      saveGithubBtn.textContent = 'Connecting...';
+      try {
+        const res = await fetch('https://api.github.com/user', {
+          headers: { 'Authorization': `token ${token}` }
+        });
+        if (res.ok) {
+          githubToken = token;
+          localStorage.setItem('githubToken', token);
+          closeGithubModal();
+          initGithub();
+        } else {
+          alert('Invalid GitHub Token');
+        }
+      } catch (e) {
+        alert('Connection failed');
+      }
+      saveGithubBtn.textContent = 'Connect Account';
+    });
+
+    const loadGithubRepos = async () => {
+      githubRepoSelect.innerHTML = '<option value="">Loading Repositories...</option>';
+      try {
+        const res = await fetch('https://api.github.com/user/repos?sort=updated&per_page=100', {
+          headers: { 'Authorization': `token ${githubToken}` }
+        });
+        const repos = await res.json();
+        githubRepoSelect.innerHTML = '<option value="">Select Repository...</option>';
+        repos.forEach(repo => {
+          const opt = document.createElement('option');
+          opt.value = repo.full_name;
+          opt.textContent = repo.full_name;
+          githubRepoSelect.appendChild(opt);
+        });
+      } catch (e) {
+        githubRepoSelect.innerHTML = '<option value="">Error loading repos</option>';
+      }
+    };
+
+    githubRepoSelect.addEventListener('change', async (e) => {
+      const repo = e.target.value;
+      if (!repo) {
+        githubBranchSelect.disabled = true;
+        githubFileSelect.disabled = true;
+        return;
+      }
+      githubBranchSelect.disabled = false;
+      githubBranchSelect.innerHTML = '<option value="">Loading...</option>';
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/branches`, {
+          headers: { 'Authorization': `token ${githubToken}` }
+        });
+        const branches = await res.json();
+        githubBranchSelect.innerHTML = '<option value="">Branch...</option>';
+        branches.forEach(b => {
+          const opt = document.createElement('option');
+          opt.value = b.name;
+          opt.textContent = b.name;
+          githubBranchSelect.appendChild(opt);
+        });
+        if(branches.length > 0) {
+          githubBranchSelect.value = branches[0].name;
+          loadGithubFiles(repo, branches[0].name);
+        }
+      } catch (err) {}
+    });
+
+    githubBranchSelect.addEventListener('change', (e) => {
+      if (githubRepoSelect.value && e.target.value) {
+        loadGithubFiles(githubRepoSelect.value, e.target.value);
+      }
+    });
+
+    const loadGithubFiles = async (repo, branch) => {
+      githubFileSelect.disabled = false;
+      githubFileSelect.innerHTML = '<option value="">Loading files...</option>';
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/git/trees/${branch}?recursive=1`, {
+          headers: { 'Authorization': `token ${githubToken}` }
+        });
+        const tree = await res.json();
+        githubFileSelect.innerHTML = '<option value="">Select Source File...</option>';
+        const supportedExtensions = ['.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', '.go', '.rs', '.php', '.cs', '.html', '.css', '.sql', '.json'];
+        const files = tree.tree.filter(f => f.type === 'blob' && supportedExtensions.some(ext => f.path.endsWith(ext)));
+        files.forEach(f => {
+          const opt = document.createElement('option');
+          opt.value = f.path;
+          opt.textContent = f.path;
+          githubFileSelect.appendChild(opt);
+        });
+      } catch (err) {
+        githubFileSelect.innerHTML = '<option value="">Error loading files</option>';
+      }
+    };
+
+    githubFileSelect.addEventListener('change', async (e) => {
+      const path = e.target.value;
+      const repo = githubRepoSelect.value;
+      const branch = githubBranchSelect.value;
+      if (!path || !repo || !branch) return;
+      
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`, {
+          headers: { 'Authorization': `token ${githubToken}` }
+        });
+        const fileData = await res.json();
+        githubCurrentSha = fileData.sha;
+        const content = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+        
+        // Populate code editor
+        codeInput.value = content;
+        updateLineNumbers();
+        updateHighlight();
+
+        const targetCodeHeader = document.getElementById('targetCodeHeader');
+        const langBadge = document.getElementById('langBadge');
+        if (targetCodeHeader && langBadge) {
+          const ext = path.split('.').pop().toUpperCase();
+          targetCodeHeader.textContent = `Target Code Snippet`;
+          langBadge.classList.remove('hidden');
+          const extMap = {
+            'PY': 'PYTHON', 'JS': 'JAVASCRIPT', 'TS': 'TYPESCRIPT', 
+            'JSX': 'REACT', 'TSX': 'REACT TS', 'CPP': 'C++', 
+            'CC': 'C++', 'CXX': 'C++', 'C': 'C', 'GO': 'GO', 
+            'RS': 'RUST', 'PHP': 'PHP', 'CS': 'C#', 'HTML': 'HTML', 
+            'CSS': 'CSS', 'SQL': 'SQL', 'JSON': 'JSON', 'JAVA': 'JAVA'
+          };
+          langBadge.textContent = extMap[ext] || ext;
+        }
+
+        // Clear active presets
+        document.querySelectorAll('.preset-btn').forEach(b => {
+          b.classList.remove('bg-indigo-600', 'text-white');
+          b.classList.add('bg-zinc-800', 'text-zinc-300');
+        });
+        currentPreset = null;
+      } catch (err) {
+        alert('Failed to load file content.');
+      }
+    });
+
+    // Commit logic
+    const openCommitModal = () => {
+      commitModal.classList.remove('hidden');
+      setTimeout(() => {
+        commitModal.classList.remove('opacity-0');
+        commitModalContent.classList.remove('scale-95');
+        commitModalContent.classList.add('scale-100');
+      }, 10);
+    };
+
+    const closeCommitModal = () => {
+      commitModal.classList.add('opacity-0');
+      commitModalContent.classList.remove('scale-100');
+      commitModalContent.classList.add('scale-95');
+      setTimeout(() => {
+        commitModal.classList.add('hidden');
+      }, 300);
+    };
+
+    pushToGithubBtn.addEventListener('click', openCommitModal);
+    closeCommitModalBtn.addEventListener('click', closeCommitModal);
+    cancelCommitModalBtn.addEventListener('click', closeCommitModal);
+    commitModalBackdrop.addEventListener('click', closeCommitModal);
+
+    confirmPushBtn.addEventListener('click', async () => {
+      const repo = githubRepoSelect.value;
+      const branch = githubBranchSelect.value;
+      const path = githubFileSelect.value;
+      const msg = commitMessageInput.value;
+      
+      if (!repo || !branch || !path) {
+        alert("Please select a repository, branch, and file first.");
+        return;
+      }
+      
+      const newContent = currentPreset ? currentPreset.prodCode : document.getElementById('productionCode').textContent;
+      
+      confirmPushBtn.textContent = 'Pushing...';
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+          method: 'PUT',
+          headers: { 
+            'Authorization': `token ${githubToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: msg,
+            content: btoa(unescape(encodeURIComponent(newContent))),
+            sha: githubCurrentSha,
+            branch: branch
+          })
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          githubCurrentSha = data.content.sha;
+          alert('Successfully pushed to GitHub!');
+          closeCommitModal();
+        } else {
+          const errorData = await res.json();
+          alert('Error: ' + errorData.message);
+        }
+      } catch (err) {
+        alert('Failed to push to GitHub.');
+      }
+      confirmPushBtn.innerHTML = 'Confirm Push';
+    });
+
+    initGithub();
   </script>
 </body>
 </html>
