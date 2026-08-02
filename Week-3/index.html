@@ -11,6 +11,10 @@
     /* Hide scrollbar for presets */
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 9999px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #6366f1; }
   </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 flex flex-col font-sans overflow-hidden">
@@ -69,7 +73,31 @@
             Upload Files
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto p-3 flex flex-col gap-1 text-sm font-mono select-none">
+
+        <!-- GitHub Selectors -->
+        <div id="githubSelectors" class="px-4 py-3 border-b border-zinc-800 bg-zinc-950 flex flex-col gap-3 shrink-0 hidden">
+          <div class="flex flex-col gap-2">
+            <select id="githubRepoSelect" class="bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] uppercase tracking-wider font-bold rounded px-2 py-1.5 w-full focus:outline-none focus:border-indigo-500 cursor-pointer">
+              <option value="">Select Repository...</option>
+            </select>
+            <select id="githubBranchSelect" class="bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] uppercase tracking-wider font-bold rounded px-2 py-1.5 w-full focus:outline-none focus:border-indigo-500 cursor-pointer" disabled>
+              <option value="">Branch...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filter Controls Bar -->
+        <div id="filterControls" class="px-4 py-2 border-b border-zinc-800 bg-zinc-900 flex flex-col gap-2 shrink-0 hidden">
+          <div class="flex items-center justify-between">
+            <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2 cursor-pointer select-none hover:text-zinc-300">
+              <input type="checkbox" id="hideLibsToggle" class="accent-indigo-500 cursor-pointer" checked>
+              <span id="hideLibsToggleText">Hide Libraries & DB Files</span>
+            </label>
+          </div>
+          <input type="text" id="customFilterInput" class="bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-[10px] text-zinc-300 placeholder-zinc-500 focus:outline-none focus:border-indigo-500" placeholder="Exclude: lib/, .sql, .db" value="">
+        </div>
+
+        <div id="workspaceFileTree" class="flex-1 overflow-auto p-3 flex flex-col gap-1 text-sm font-mono select-none custom-scroll">
           <div class="flex items-center gap-2 px-2 py-1.5 text-zinc-400 rounded transition-colors">
             <span class="text-indigo-400">📁</span>
             <span class="font-bold text-zinc-300">src/</span>
@@ -103,21 +131,6 @@
             <span id="langBadge" class="bg-indigo-600/20 text-indigo-400 px-1.5 py-0.5 rounded text-[9px] tracking-widest border border-indigo-500/20 hidden"></span>
           </h2>
         </div>
-        
-        <!-- GitHub Selectors -->
-        <div id="githubSelectors" class="px-4 py-3 border-b border-zinc-800 bg-zinc-950 flex flex-col gap-3 shrink-0 hidden">
-          <div class="flex gap-2">
-            <select id="githubRepoSelect" class="bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] uppercase tracking-wider font-bold rounded px-2 py-1.5 flex-1 focus:outline-none focus:border-indigo-500 cursor-pointer">
-              <option value="">Select Repository...</option>
-            </select>
-            <select id="githubBranchSelect" class="bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] uppercase tracking-wider font-bold rounded px-2 py-1.5 w-1/3 focus:outline-none focus:border-indigo-500 cursor-pointer" disabled>
-              <option value="">Branch...</option>
-            </select>
-          </div>
-          <select id="githubFileSelect" class="bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] uppercase tracking-wider font-bold rounded px-2 py-1.5 w-full focus:outline-none focus:border-indigo-500 cursor-pointer" disabled>
-            <option value="">Select Source File...</option>
-          </select>
-        </div>
 
         <!-- Interactive Presets -->
         <div class="px-4 py-2 border-b border-zinc-800 bg-zinc-900/50 flex gap-2 overflow-x-auto hide-scrollbar shrink-0">
@@ -133,7 +146,7 @@
           </div>
           <div class="flex-1 relative overflow-hidden bg-zinc-950/50">
             <pre id="codeHighlight" class="absolute inset-0 p-4 m-0 font-mono text-sm leading-relaxed pointer-events-none whitespace-pre overflow-hidden text-zinc-300"></pre>
-            <textarea id="codeInput" class="absolute inset-0 w-full h-full bg-transparent p-4 font-mono text-sm leading-relaxed focus:outline-none resize-none whitespace-pre overflow-auto text-transparent caret-white" spellcheck="false" placeholder="Paste unoptimized code here..."></textarea>
+            <textarea id="codeInput" class="absolute inset-0 w-full h-full bg-transparent p-4 font-mono text-sm leading-relaxed focus:outline-none resize-none whitespace-pre overflow-auto text-transparent caret-white custom-scroll" spellcheck="false" placeholder="Paste unoptimized code here..."></textarea>
           </div>
         </div>
         <div class="p-4 border-t border-zinc-800 bg-zinc-900/80 shrink-0">
@@ -153,22 +166,25 @@
             <p id="statusMsg" class="text-sm text-zinc-500 text-center">
               Select a preset or paste code, then press <strong class="text-zinc-400">"Run RefactorAI"</strong>.
             </p>
+            <div id="apiErrorBanner" class="hidden mt-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-xs font-bold text-center"></div>
           </div>
         </section>
 
         <!-- Results Panel (Initially hidden) -->
         <div id="resultsPanel" class="flex flex-col gap-4 h-full hidden opacity-0 transition-opacity duration-500">
           <!-- 1. Overview & Approach -->
-          <section class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 shrink-0">
-            <h3 class="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3">1. Overview & Approach</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="space-y-2">
-                <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Analysis</p>
-                <p id="analysisText" class="text-sm text-zinc-300 leading-snug"></p>
-              </div>
-              <div class="space-y-2">
-                <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Optimization Strategy</p>
-                <p id="strategyText" class="text-sm text-zinc-300 leading-snug"></p>
+          <section class="bg-zinc-900 border border-zinc-800 rounded-2xl shrink-0 max-h-48 overflow-hidden flex flex-col">
+            <div class="p-5 overflow-y-auto custom-scroll flex-1">
+              <h3 class="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3 shrink-0">1. Overview & Approach</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Analysis</p>
+                  <p id="analysisText" class="text-sm text-zinc-300 leading-snug"></p>
+                </div>
+                <div class="space-y-2">
+                  <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Optimization Strategy</p>
+                  <p id="strategyText" class="text-sm text-zinc-300 leading-snug"></p>
+                </div>
               </div>
             </div>
           </section>
@@ -182,7 +198,7 @@
                 <span id="copyBtnText">Copy Code</span>
               </button>
             </div>
-            <div class="flex-1 bg-zinc-950 p-6 font-mono text-xs overflow-auto relative">
+            <div class="flex-1 bg-zinc-950 p-6 font-mono text-xs overflow-auto relative custom-scroll">
               <pre id="productionCode" class="m-0 whitespace-pre"></pre>
             </div>
             <div class="px-5 py-2 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between shrink-0">
@@ -197,22 +213,24 @@
           </section>
 
           <!-- Bottom Row: 3. Verification & Performance -->
-          <div class="grid grid-cols-1 sm:grid-cols-7 gap-4 shrink-0">
+          <div class="grid grid-cols-1 sm:grid-cols-7 gap-4 shrink-0 h-24">
             <!-- 3. Verification & Key Takeaways -->
-            <section class="sm:col-span-4 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col justify-center">
-              <h3 class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-1">3. Verification</h3>
-              <p id="verificationText" class="text-xs text-zinc-400 italic"></p>
+            <section class="sm:col-span-4 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col overflow-hidden h-full">
+              <div class="p-4 flex flex-col justify-start overflow-y-auto custom-scroll h-full">
+                <h3 class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-1 shrink-0">3. Verification</h3>
+                <p id="verificationText" class="text-xs text-zinc-400 italic"></p>
+              </div>
             </section>
 
             <!-- Performance Metrics Bento -->
-            <section class="sm:col-span-3 bg-indigo-600 rounded-2xl p-4 flex flex-col justify-between shadow-xl shadow-indigo-900/20">
-              <div class="flex justify-between items-start mb-4 sm:mb-0">
-                <span class="text-[10px] font-bold text-indigo-200 uppercase">Complexity</span>
+            <section class="sm:col-span-3 bg-indigo-600 rounded-2xl p-4 flex flex-col justify-between h-full shadow-xl shadow-indigo-900/20 overflow-hidden">
+              <div class="flex justify-between items-start shrink-0">
+                <span class="text-[10px] font-bold text-indigo-200 uppercase tracking-widest">Complexity</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigo-200" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
               </div>
-              <div class="flex items-end justify-between">
-                <span id="complexityMetric" class="text-2xl font-bold text-white leading-none">O(1)</span>
-                <span id="complexityScale" class="text-[10px] text-indigo-200 uppercase tracking-widest">Constant</span>
+              <div class="flex items-end justify-between overflow-hidden mt-1">
+                <span id="complexityMetric" class="overflow-hidden text-ellipsis whitespace-nowrap text-3xl sm:text-4xl font-extrabold font-mono text-white leading-none">O(1)</span>
+                <span id="complexityScale" class="text-[10px] text-indigo-200 uppercase tracking-widest ml-2 shrink-0 mb-1">Constant</span>
               </div>
             </section>
           </div>
@@ -242,11 +260,36 @@
         </button>
       </div>
       <div class="p-6 space-y-5">
+        <div id="settingsModalPrompt" class="hidden text-amber-400 text-xs font-bold bg-amber-400/10 p-3 rounded border border-amber-400/20 mb-4">Please enter your API key to run live refactoring.</div>
+        
         <div class="space-y-2">
-          <label for="apiKeyInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Gemini API Key</label>
-          <input type="password" id="apiKeyInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="AIzaSy..." />
+          <label for="providerSelect" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">LLM Provider</label>
+          <select id="providerSelect" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors">
+            <option value="gemini">Google Gemini</option>
+            <option value="openai">OpenAI (GPT-4o/o3)</option>
+            <option value="anthropic">Anthropic Claude</option>
+            <option value="groq">Groq</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="custom">Custom OpenAI-Compatible</option>
+          </select>
+        </div>
+        
+
+
+        <div id="baseUrlContainer" class="space-y-2 hidden">
+          <label for="baseUrlInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Base URL</label>
+          <input type="text" id="baseUrlInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="http://localhost:11434/v1" />
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <label for="apiKeyInput" id="apiKeyLabel" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">API Key</label>
+            <span id="apiKeyStatus" class="text-[10px] font-bold text-zinc-500"></span>
+          </div>
+          <input type="password" id="apiKeyInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Enter API Key..." />
           <p class="text-[10px] text-zinc-500">Stored locally in your browser. Optional for offline mock mode.</p>
         </div>
+
         <div class="space-y-2">
           <div class="flex justify-between items-center">
             <label for="tempInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Model Temperature</label>
@@ -281,9 +324,9 @@
       </div>
       <div class="p-6 space-y-5">
         <div class="space-y-2">
-          <label for="githubPatInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Personal Access Token (Classic)</label>
-          <input type="password" id="githubPatInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="ghp_..." />
-          <p class="text-[10px] text-zinc-500">Requires 'repo' scope. Stored locally in your browser.</p>
+          <label for="githubPatInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Personal Access Token</label>
+          <input type="password" id="githubPatInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="ghp_... or github_pat_..." />
+          <p class="text-[10px] text-zinc-500">Paste a Personal Access Token with write permissions ('repo' scope for Classic tokens or 'Contents: Read and write' for Fine-grained tokens).</p>
         </div>
       </div>
       <div class="px-6 py-4 border-t border-zinc-800 bg-zinc-950 flex justify-end gap-3">
@@ -319,7 +362,37 @@
     </div>
   </div>
 
+  <!-- GitHub Error Modal -->
+  <div id="githubErrorModal" class="fixed inset-0 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" id="githubErrorModalBackdrop"></div>
+    <div class="relative w-full max-w-md bg-zinc-900 border border-red-500/30 rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="githubErrorModalContent">
+      <div class="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-red-400 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          Permission Denied
+        </h2>
+        <button id="closeGithubErrorModalBtn" class="text-zinc-400 hover:text-white transition-colors cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-4 text-sm text-zinc-300">
+        <p>Your Personal Access Token requires Write access. Please check your GitHub token permissions:</p>
+        <ul class="list-disc pl-5 space-y-2 text-zinc-400">
+          <li><strong class="text-zinc-200">Classic PAT:</strong> Enable the <code class="text-emerald-400 bg-emerald-400/10 px-1 rounded">repo</code> scope.</li>
+          <li><strong class="text-zinc-200">Fine-Grained PAT:</strong> Set Repository Permissions &rarr; Contents to <code class="text-emerald-400 bg-emerald-400/10 px-1 rounded">Read and write</code>.</li>
+        </ul>
+      </div>
+      <div class="px-6 py-4 border-t border-zinc-800 bg-zinc-950 flex justify-end gap-3">
+        <button id="understoodGithubErrorBtn" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-lg shadow-red-600/20 cursor-pointer">Understood</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let activeGithubFilePath = null;
+    let githubTreeCache = [];
+    let dynamicGeminiModels = [];
+    
     const presets = {
       loop: {
         code: "def get_even_numbers(numbers):\n    evens = []\n    for i in range(len(numbers)):\n        if numbers[i] % 2 == 0:\n            evens.append(numbers[i])\n    return evens",
@@ -404,12 +477,16 @@
 
     // Syntax Highlighting (Basic Regex Replace for Demo)
     const highlightCode = (code) => {
-      let escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      return escaped
-        .replace(/\b(\d+\.?\d*)\b/g, '<span class="text-orange-400">$1</span>')
-        .replace(/(["'`])(?:(?=(\\?))\2.)*?\1/g, '<span class="text-emerald-400">$&</span>')
-        .replace(/\b(def|return|for|in|if|with|as|function|const|let|var|class|import|from|export|public|private|protected|package|go|func|chan|struct|impl|match|fn|use)\b/g, '<span class="text-purple-400">$1</span>')
-        .replace(/\b(sum|list|int|float|str|print|open|console|log|String|Integer|System|out|println|fmt|Printf|vec)\b/g, '<span class="text-blue-400">$1</span>');
+      let escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const regex = /(["'`])(?:(?=(\\?))\2.)*?\1|\b(\d+\.?\d*)\b|\b(def|return|for|in|if|with|as|function|const|let|var|class|import|from|export|public|private|protected|package|go|func|chan|struct|impl|match|fn|use)\b|\b(sum|list|int|float|str|print|open|console|log|String|Integer|System|out|println|fmt|Printf|vec)\b/g;
+      
+      return escaped.replace(regex, (match, str, esc, num, kw, func) => {
+        if (str !== undefined) return `<span class="text-emerald-400">${match}</span>`;
+        if (num !== undefined) return `<span class="text-orange-400">${match}</span>`;
+        if (kw !== undefined) return `<span class="text-purple-400">${match}</span>`;
+        if (func !== undefined) return `<span class="text-blue-400">${match}</span>`;
+        return match;
+      });
     };
 
     // Handle Presets and File Explorer clicks
@@ -475,6 +552,18 @@
 
     // Simulate or perform AI Refactoring
     refactorBtn.addEventListener('click', async () => {
+      const provider = localStorage.getItem('llm_provider') || 'gemini';
+      let apiKey = localStorage.getItem(`${provider}_api_key`) || '';
+      if (provider === 'gemini' && !apiKey) {
+        apiKey = localStorage.getItem('geminiApiKey') || '';
+      }
+      
+      if (!apiKey) {
+        document.getElementById('settingsModalPrompt').classList.remove('hidden');
+        openModal();
+        return;
+      }
+      
       const codeToRefactor = codeInput.value.trim();
       if (!codeToRefactor) {
         alert('Please paste or select a code snippet first!');
@@ -485,6 +574,10 @@
       resultsPanel.classList.add('hidden', 'opacity-0');
       idleState.classList.remove('hidden');
       
+      // Clear previous error
+      const apiErrorBanner = document.getElementById('apiErrorBanner');
+      if (apiErrorBanner) apiErrorBanner.classList.add('hidden');
+
       statusBadge.textContent = "Status: Analyzing Code...";
       statusBadge.className = "text-[10px] font-bold uppercase tracking-widest text-amber-400 animate-pulse";
       statusMsg.innerHTML = "Analyzing target snippet...";
@@ -492,7 +585,6 @@
       refactorBtn.disabled = true;
       refactorBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
-      const apiKey = localStorage.getItem('geminiApiKey') || '';
       const temperature = parseFloat(localStorage.getItem('geminiTemp') || '0.7');
 
       const renderResults = (data) => {
@@ -516,7 +608,7 @@
         complexityScale.textContent = data.scale;
         charCount.textContent = `Characters: ${data.prodCode.length}`;
         
-        if (githubToken && typeof githubFileSelect !== 'undefined' && githubFileSelect.value) {
+        if (githubToken && activeGithubFilePath) {
           pushToGithubBtn.classList.remove('hidden');
           pushToGithubBtn.classList.add('flex');
         } else {
@@ -525,87 +617,237 @@
         }
       };
 
-      if (apiKey) {
-        try {
-          const fileName = (typeof githubFileSelect !== 'undefined' && !githubFileSelect.disabled && githubFileSelect.value) ? githubFileSelect.value : "unknown";
+      try {
+        const fileName = activeGithubFilePath || "unknown";
           
           const systemPrompt = `You are an expert AI refactoring engine. 
 1. Auto-detect the target programming language from the provided code snippet or the file name (${fileName}).
 2. Apply language-specific best practices (e.g., PEP 8 for Python, ES6+/Async for JS, C++ memory safety, Idiomatic Go).
 3. Return the response EXCLUSIVELY as a valid JSON object with the following exact keys:
    - "language": string (detected language name)
-   - "analysis": string (brief summary of current code issues)
-   - "strategy": string (how you will improve it)
+   - "analysis": "Provide a clean, 2-3 sentence overview in simple, conversational developer terms explaining the core issues."
+   - "strategy": "Provide 3 concise bullet points (max 10 words each) describing the fix."
    - "prodCode": string (the fully refactored, production-ready code)
    - "verification": string (how to test or verify)
-   - "complexity": string (e.g., "O(n)", "O(1)")
-   - "scale": string (e.g., "Enterprise", "Production")
-Do not include any markdown formatting outside the JSON block.`;
+   - "complexity": "STRICT REQUIREMENT: Return ONLY standard Big-O notation (e.g., 'O(1)', 'O(n)', 'O(n log n)', 'O(n²)'). Do NOT include sentences, explanations, or variable definitions."
+   - "scale": "STRICT REQUIREMENT: Return ONLY 1 or 2 words describing scale (e.g., 'Constant', 'Linear', 'Logarithmic')."
+When returning the 'prodCode' key, ensure all newlines inside the code string are properly escaped as \\n so the output remains valid JSON. Do not include any markdown formatting outside the JSON block.`;
 
-          const payload = {
-            contents: [{ parts: [{ text: `Code to refactor:\n\n${codeToRefactor}` }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            generationConfig: {
-              temperature: temperature,
-              responseMimeType: "application/json"
+          let modelName = 'gemini-2.5-flash';
+          if (provider === 'openai') modelName = 'gpt-4o';
+          else if (provider === 'anthropic') modelName = 'claude-3-5-sonnet-20240620';
+          else if (provider === 'groq') modelName = 'llama-3.3-70b-versatile';
+          else if (provider === 'openrouter') modelName = 'deepseek/deepseek-r1:free';
+          else if (provider === 'custom') modelName = 'custom-model';
+          
+          let baseUrl = localStorage.getItem('llm_baseurl') || 'http://localhost:11434/v1';
+          if (provider === 'groq') baseUrl = 'https://api.groq.com/openai/v1';
+          else if (provider === 'openrouter') baseUrl = 'https://openrouter.ai/api/v1';
+          
+          let response;
+          if (provider === 'gemini') {
+            if (dynamicGeminiModels.length === 0) {
+              try {
+                const modelRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                if (modelRes.ok) {
+                  const modelData = await modelRes.json();
+                  const validModels = modelData.models.filter(m => 
+                    m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent') &&
+                    m.name.includes('gemini') &&
+                    !m.name.includes('-tts') &&
+                    !m.name.includes('-audio') &&
+                    !m.name.includes('embedding') &&
+                    !m.name.includes('imagen')
+                  );
+                  let modelNames = validModels.map(m => m.name.replace('models/', ''));
+                  const priority = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+                  const sorted = [];
+                  priority.forEach(p => {
+                    const idx = modelNames.indexOf(p);
+                    if (idx !== -1) sorted.push(modelNames.splice(idx, 1)[0]);
+                  });
+                  dynamicGeminiModels = [...sorted, ...modelNames];
+                }
+              } catch (e) {
+                console.warn("Failed to dynamically fetch Gemini models, using defaults.", e);
+              }
             }
-          };
 
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
+            const payload = {
+              contents: [{ parts: [{ text: `Code to refactor:\n\n${codeToRefactor}` }] }],
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              generationConfig: {
+                temperature: temperature,
+                responseMimeType: "application/json"
+              }
+            };
 
+            let fallbackChain = dynamicGeminiModels.length > 0 ? dynamicGeminiModels : ['gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+            let lastErrorDetails = null;
+
+            for (const model of fallbackChain) {
+              response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              
+              if (response.ok) {
+                lastErrorDetails = null;
+                break;
+              } else {
+                let errorDetails = `${response.status} ${response.statusText}`;
+                try {
+                  const errorData = await response.json();
+                  if (errorData.error && errorData.error.message) {
+                    errorDetails = errorData.error.message;
+                  } else if (errorData.error && errorData.error.status) {
+                    errorDetails = errorData.error.status;
+                  }
+                } catch (e) {}
+                lastErrorDetails = errorDetails;
+                
+                if (response.status === 429 || response.status === 404 || errorDetails.toLowerCase().includes('quota') || errorDetails.toLowerCase().includes('limit')) {
+                  continue;
+                } else {
+                  break;
+                }
+              }
+            }
+            
+            if (lastErrorDetails) {
+              throw new Error(lastErrorDetails);
+            }
+          } else if (provider === 'openai' || provider === 'custom' || provider === 'groq' || provider === 'openrouter') {
+            let endpoint = 'https://api.openai.com/v1/chat/completions';
+            if (provider === 'custom' || provider === 'groq' || provider === 'openrouter') {
+              endpoint = `${baseUrl}/chat/completions`;
+            }
+            const payload = {
+              model: modelName,
+              temperature: (provider === 'groq' || provider === 'openrouter') ? 0.2 : temperature,
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: codeToRefactor }
+              ]
+            };
+            
+            if (provider === 'openai' || provider === 'custom') {
+              payload.response_format = { type: "json_object" };
+            }
+
+            response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json' 
+              },
+              body: JSON.stringify(payload)
+            });
+          } else if (provider === 'anthropic') {
+            const payload = {
+              model: modelName,
+              temperature: temperature,
+              max_tokens: 4096,
+              system: systemPrompt,
+              messages: [
+                { role: "user", content: codeToRefactor }
+              ]
+            };
+            response = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: { 
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01',
+                'Content-Type': 'application/json' 
+              },
+              body: JSON.stringify(payload)
+            });
+          }
+          
           if (!response.ok) {
-            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            let errorDetails = `${response.status} ${response.statusText}`;
+            try {
+              const errorData = await response.json();
+              if (errorData.error && errorData.error.message) {
+                errorDetails = errorData.error.message;
+              } else if (errorData.error && errorData.error.status) {
+                errorDetails = errorData.error.status;
+              } else if (errorData.error) {
+                errorDetails = typeof errorData.error === 'string' ? errorData.error : JSON.stringify(errorData.error);
+              } else if (errorData.message) {
+                errorDetails = errorData.message;
+              }
+            } catch (e) {}
+            throw new Error(errorDetails);
           }
 
           const data = await response.json();
-          let jsonStr = data.candidates[0].content.parts[0].text;
-          jsonStr = jsonStr.replace(/^```json/m, '').replace(/^```/m, '').replace(/```$/m, '').trim();
-          const parsed = JSON.parse(jsonStr);
+          let rawOutput = '';
+          if (provider === 'gemini') {
+            rawOutput = data.candidates[0].content.parts[0].text;
+          } else if (provider === 'openai' || provider === 'custom' || provider === 'groq' || provider === 'openrouter') {
+            rawOutput = data.choices[0].message.content;
+          } else if (provider === 'anthropic') {
+            rawOutput = data.content[0].text;
+          }
+
+          let jsonStr = rawOutput.replace(/```json/gi, '').replace(/```/g, '').trim();
+          
+          let parsed;
+          try {
+            const sanitizedJsonStr = jsonStr.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"/g, (match) => {
+              return match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+            });
+            parsed = JSON.parse(sanitizedJsonStr);
+          } catch (err) {
+            console.warn("JSON parse failed, attempting regex fallback.", err);
+            const codeMatch = rawOutput.match(/```(?:[\w]+)?\n([\s\S]*?)```/);
+            const fallbackCode = codeMatch ? codeMatch[1].trim() : "/* JSON Parse Failed. Raw Output: */\n" + rawOutput;
+            parsed = {
+              analysis: "JSON parsing failed. Showing extracted code.",
+              strategy: "Fallback Regex Extraction",
+              prodCode: fallbackCode,
+              verification: "Manual verification required",
+              complexity: "N/A",
+              scale: "N/A"
+            };
+          }
 
           currentPreset = {
-            analysis: parsed.analysis,
-            strategy: parsed.strategy,
-            prodCode: parsed.prodCode,
-            verification: parsed.verification,
-            complexity: parsed.complexity,
-            scale: parsed.scale
+            analysis: parsed.analysis || "N/A",
+            strategy: parsed.strategy || "N/A",
+            prodCode: parsed.prodCode || "/* No code generated */",
+            verification: parsed.verification || "N/A",
+            complexity: parsed.complexity || "N/A",
+            scale: parsed.scale || "N/A"
           };
 
           renderResults(currentPreset);
-
         } catch (error) {
           console.error(error);
-          alert('Failed to refactor code using Gemini API. Falling back to mock data if available.');
-          if (currentPreset) {
-            renderResults(currentPreset);
+          
+          let errorMsg = 'Refactoring failed.';
+          if (error.message.includes('Failed to fetch') || error.message.includes('Network Error')) {
+            errorMsg = 'Network Error - Please check your connection or CORS settings.';
+          } else if (error.message.includes('Quota Error (Limit 0)')) {
+            errorMsg = error.message;
           } else {
-            idleState.classList.remove('hidden');
-            refactorBtn.disabled = false;
-            refactorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            statusBadge.textContent = "Status: Idle";
-            statusBadge.className = "text-[10px] font-bold uppercase tracking-widest text-zinc-500";
-            statusMsg.innerHTML = "Select a preset or paste code above";
+            errorMsg = `API Error: ${error.message}`;
+          }
+
+          idleState.classList.remove('hidden');
+          refactorBtn.disabled = false;
+          refactorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          statusBadge.textContent = "Status: Error";
+          statusBadge.className = "text-[10px] font-bold uppercase tracking-widest text-red-500";
+          statusMsg.innerHTML = "Refactoring failed. Please review the error below.";
+          
+          if (apiErrorBanner) {
+            apiErrorBanner.textContent = errorMsg;
+            apiErrorBanner.classList.remove('hidden');
           }
         }
-      } else {
-        setTimeout(() => {
-          if (!currentPreset) {
-            alert('No preset selected and no API key provided. Please select a preset for offline mock mode.');
-            idleState.classList.remove('hidden');
-            refactorBtn.disabled = false;
-            refactorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            statusBadge.textContent = "Status: Idle";
-            statusBadge.className = "text-[10px] font-bold uppercase tracking-widest text-zinc-500";
-            statusMsg.innerHTML = "Select a preset or paste code above";
-            return;
-          }
-          renderResults(currentPreset);
-        }, 800);
-      }
     });
 
     // Initialize line numbers
@@ -622,16 +864,132 @@ Do not include any markdown formatting outside the JSON block.`;
     const apiKeyInput = document.getElementById('apiKeyInput');
     const tempInput = document.getElementById('tempInput');
     const tempValueDisplay = document.getElementById('tempValueDisplay');
+    const providerSelect = document.getElementById('providerSelect');
+    const baseUrlContainer = document.getElementById('baseUrlContainer');
+    const baseUrlInput = document.getElementById('baseUrlInput');
+    const apiKeyStatus = document.getElementById('apiKeyStatus');
 
-    const loadSettings = () => {
-      const savedKey = localStorage.getItem('geminiApiKey') || '';
+    apiKeyInput.addEventListener('input', async (e) => {
+      const val = e.target.value.trim();
+      if (!val) {
+        apiKeyStatus.textContent = '';
+        return;
+      }
+      
+      if (val.startsWith('AIzaSy')) {
+        if (providerSelect.value !== 'gemini') {
+          providerSelect.value = 'gemini';
+          providerSelect.dispatchEvent(new Event('change'));
+        }
+        
+        apiKeyStatus.textContent = 'Checking key...';
+        apiKeyStatus.className = 'text-[10px] font-bold text-amber-400';
+        
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${val}`);
+          if (!res.ok) throw new Error('Invalid API Key');
+          const data = await res.json();
+          const validModels = data.models.filter(m => 
+            m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent') &&
+            m.name.includes('gemini') &&
+            !m.name.includes('-tts') &&
+            !m.name.includes('-audio') &&
+            !m.name.includes('embedding') &&
+            !m.name.includes('imagen')
+          );
+          let modelNames = validModels.map(m => m.name.replace('models/', ''));
+          const priority = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+          const sorted = [];
+          priority.forEach(p => {
+            const idx = modelNames.indexOf(p);
+            if (idx !== -1) sorted.push(modelNames.splice(idx, 1)[0]);
+          });
+          dynamicGeminiModels = [...sorted, ...modelNames];
+          
+          if (dynamicGeminiModels.length > 0) {
+            apiKeyStatus.textContent = `Connected: ${dynamicGeminiModels.length} models found`;
+            apiKeyStatus.className = 'text-[10px] font-bold text-emerald-400';
+          } else {
+            apiKeyStatus.textContent = 'No compatible models found';
+            apiKeyStatus.className = 'text-[10px] font-bold text-amber-400';
+          }
+        } catch (err) {
+          apiKeyStatus.textContent = 'Invalid API Key';
+          apiKeyStatus.className = 'text-[10px] font-bold text-red-400';
+        }
+      } else if (val.startsWith('sk-ant-')) {
+        if (providerSelect.value !== 'anthropic') {
+          providerSelect.value = 'anthropic';
+          providerSelect.dispatchEvent(new Event('change'));
+        }
+        apiKeyStatus.textContent = 'Detected: Anthropic';
+        apiKeyStatus.className = 'text-[10px] font-bold text-emerald-400';
+      } else if (val.startsWith('sk-or-v1-')) {
+        if (providerSelect.value !== 'openrouter') {
+          providerSelect.value = 'openrouter';
+          providerSelect.dispatchEvent(new Event('change'));
+        }
+        baseUrlInput.value = 'https://openrouter.ai/api/v1';
+        apiKeyStatus.textContent = 'Detected: OpenRouter';
+        apiKeyStatus.className = 'text-[10px] font-bold text-emerald-400';
+      } else if (val.startsWith('gsk_')) {
+        if (providerSelect.value !== 'groq') {
+          providerSelect.value = 'groq';
+          providerSelect.dispatchEvent(new Event('change'));
+        }
+        baseUrlInput.value = 'https://api.groq.com/openai/v1';
+        apiKeyStatus.textContent = 'Detected: Groq';
+        apiKeyStatus.className = 'text-[10px] font-bold text-emerald-400';
+      } else if (val.startsWith('sk-')) {
+        if (providerSelect.value !== 'openai') {
+          providerSelect.value = 'openai';
+          providerSelect.dispatchEvent(new Event('change'));
+        }
+        apiKeyStatus.textContent = 'Detected: OpenAI';
+        apiKeyStatus.className = 'text-[10px] font-bold text-emerald-400';
+      } else {
+        apiKeyStatus.textContent = '';
+      }
+    });
+
+    providerSelect.addEventListener('change', (e) => {
+      const p = e.target.value;
+      if (p === 'custom') {
+        baseUrlContainer.classList.remove('hidden');
+      } else {
+        baseUrlContainer.classList.add('hidden');
+      }
+      
+      const providerKey = localStorage.getItem(`${p}_api_key`) || '';
+      if (p === 'gemini' && !providerKey) {
+        apiKeyInput.value = localStorage.getItem('gemini_api_key') || localStorage.getItem('geminiApiKey') || '';
+      } else {
+        apiKeyInput.value = providerKey;
+      }
+      
+      // Trigger input event to re-validate key if needed
+      if (apiKeyInput.value) {
+        apiKeyInput.dispatchEvent(new Event('input'));
+      } else {
+        apiKeyStatus.textContent = '';
+      }
+    });
+
+    function loadSettings() {
+      const savedProvider = localStorage.getItem('llm_provider') || 'gemini';
+      const savedBaseUrl = localStorage.getItem('llm_baseurl') || '';
+      
+      providerSelect.value = savedProvider;
+      providerSelect.dispatchEvent(new Event('change')); // This will set the API key input correctly
+      
+      baseUrlInput.value = savedBaseUrl;
+      
       const savedTemp = localStorage.getItem('geminiTemp') || '0.7';
-      apiKeyInput.value = savedKey;
       tempInput.value = savedTemp;
       tempValueDisplay.textContent = parseFloat(savedTemp).toFixed(1);
-    };
+    }
 
-    const openModal = () => {
+    function openModal() {
       loadSettings();
       settingsModal.classList.remove('hidden');
       setTimeout(() => {
@@ -639,16 +997,17 @@ Do not include any markdown formatting outside the JSON block.`;
         modalContent.classList.remove('scale-95');
         modalContent.classList.add('scale-100');
       }, 10);
-    };
+    }
 
-    const closeModal = () => {
+    function closeModal() {
       settingsModal.classList.add('opacity-0');
       modalContent.classList.remove('scale-100');
       modalContent.classList.add('scale-95');
       setTimeout(() => {
         settingsModal.classList.add('hidden');
+        document.getElementById('settingsModalPrompt').classList.add('hidden');
       }, 300);
-    };
+    }
 
     tempInput.addEventListener('input', (e) => {
       tempValueDisplay.textContent = parseFloat(e.target.value).toFixed(1);
@@ -659,7 +1018,20 @@ Do not include any markdown formatting outside the JSON block.`;
     cancelModalBtn.addEventListener('click', closeModal);
 
     saveSettingsBtn.addEventListener('click', () => {
-      localStorage.setItem('geminiApiKey', apiKeyInput.value.trim());
+      let modelToSave = 'gemini-2.5-flash';
+      if (providerSelect.value === 'openai') modelToSave = 'gpt-4o';
+      else if (providerSelect.value === 'anthropic') modelToSave = 'claude-3-5-sonnet-20240620';
+      else if (providerSelect.value === 'groq') modelToSave = 'llama-3.3-70b-versatile';
+      else if (providerSelect.value === 'openrouter') modelToSave = 'deepseek/deepseek-r1:free';
+      else if (providerSelect.value === 'custom') modelToSave = 'custom-model';
+
+      localStorage.setItem('llm_provider', providerSelect.value);
+      localStorage.setItem('llm_model', modelToSave);
+      localStorage.setItem('llm_baseurl', baseUrlInput.value.trim());
+      localStorage.setItem(`${providerSelect.value}_api_key`, apiKeyInput.value.trim());
+      if (providerSelect.value === 'gemini') {
+        localStorage.setItem('geminiApiKey', apiKeyInput.value.trim());
+      }
       localStorage.setItem('geminiTemp', tempInput.value);
       closeModal();
     });
@@ -684,7 +1056,6 @@ Do not include any markdown formatting outside the JSON block.`;
     const githubSelectors = document.getElementById('githubSelectors');
     const githubRepoSelect = document.getElementById('githubRepoSelect');
     const githubBranchSelect = document.getElementById('githubBranchSelect');
-    const githubFileSelect = document.getElementById('githubFileSelect');
 
     const pushToGithubBtn = document.getElementById('pushToGithubBtn');
     const commitModal = document.getElementById('commitModal');
@@ -694,6 +1065,12 @@ Do not include any markdown formatting outside the JSON block.`;
     const cancelCommitModalBtn = document.getElementById('cancelCommitModalBtn');
     const confirmPushBtn = document.getElementById('confirmPushBtn');
     const commitMessageInput = document.getElementById('commitMessageInput');
+
+    const githubErrorModal = document.getElementById('githubErrorModal');
+    const githubErrorModalContent = document.getElementById('githubErrorModalContent');
+    const closeGithubErrorModalBtn = document.getElementById('closeGithubErrorModalBtn');
+    const understoodGithubErrorBtn = document.getElementById('understoodGithubErrorBtn');
+    const githubErrorModalBackdrop = document.getElementById('githubErrorModalBackdrop');
 
     let githubToken = localStorage.getItem('githubToken') || '';
     let githubUser = null;
@@ -791,11 +1168,14 @@ Do not include any markdown formatting outside the JSON block.`;
       const repo = e.target.value;
       if (!repo) {
         githubBranchSelect.disabled = true;
-        githubFileSelect.disabled = true;
+        const workspaceFileTree = document.getElementById('workspaceFileTree');
+        workspaceFileTree.innerHTML = '<div class="text-zinc-500 text-xs p-4 text-center">Select a repository to view files</div>';
         return;
       }
+
       githubBranchSelect.disabled = false;
       githubBranchSelect.innerHTML = '<option value="">Loading...</option>';
+
       try {
         const res = await fetch(`https://api.github.com/repos/${repo}/branches`, {
           headers: { 'Authorization': `token ${githubToken}` }
@@ -821,73 +1201,139 @@ Do not include any markdown formatting outside the JSON block.`;
       }
     });
 
+    const renderWorkspaceTree = () => {
+      const workspaceFileTree = document.getElementById('workspaceFileTree');
+      const hideLibsToggle = document.getElementById('hideLibsToggle');
+      const customFilterInput = document.getElementById('customFilterInput');
+
+      workspaceFileTree.innerHTML = '';
+      let files = githubTreeCache;
+      
+      if (hideLibsToggle.checked) {
+        const hiddenFolders = ['.git/', 'lib/', 'node_modules/', 'vendor/', 'build/', 'bin/', 'target/'];
+        const hiddenExts = ['.pdf', '.png', '.jpg', '.jpeg', '.svg', '.docx', '.xlsx', '.zip', '.gz', '.tar', '.sql', '.db', '.sqlite', '.jar'];
+        const hiddenFiles = ['.gitignore', '.gitattributes', '.gitmodules', '.ds_store'];
+        const codeExts = ['.md', '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', '.h', '.hpp', '.go', '.rs', '.php', '.cs', '.html', '.css', '.scss', '.json', '.yaml', '.yml', '.toml', '.xml', '.sh', '.rb', '.swift', '.kt', '.dart', '.vue', '.svelte', '.astro'];
+        
+        files = files.filter(f => {
+          const lowerPath = f.path.toLowerCase();
+          const filename = lowerPath.split('/').pop();
+          
+          if (hiddenFolders.some(folder => lowerPath.includes(folder))) return false;
+          if (hiddenExts.some(ext => lowerPath.endsWith(ext))) return false;
+          if (hiddenFiles.includes(filename)) return false;
+          if (filename.startsWith('.env')) return false;
+          
+          // Strict code-only (and md)
+          return codeExts.some(ext => lowerPath.endsWith(ext)) || !filename.includes('.'); 
+        });
+      }
+
+      const customFilterStr = customFilterInput.value;
+      const customFilter = customFilterStr.split(',').map(s => s.trim()).filter(s => s);
+      if (customFilter.length > 0) {
+        files = files.filter(f => !customFilter.some(pattern => f.path.includes(pattern)));
+      }
+
+      files.forEach(f => {
+        const div = document.createElement('div');
+        div.className = "flex items-center gap-2 px-2 py-1.5 ml-2 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300 rounded cursor-pointer transition-colors text-xs whitespace-nowrap";
+        const icon = document.createElement('span');
+        icon.className = "text-zinc-500 shrink-0";
+        icon.textContent = "📄";
+        const name = document.createElement('span');
+        name.textContent = f.path;
+        div.appendChild(icon);
+        div.appendChild(name);
+
+        if (activeGithubFilePath === f.path) {
+          div.classList.add('bg-indigo-600/10', 'text-indigo-300');
+          div.classList.remove('text-zinc-400');
+        }
+
+        div.addEventListener('click', async () => {
+          const repo = githubRepoSelect.value;
+          const branch = githubBranchSelect.value;
+          const path = f.path;
+          if (!path || !repo || !branch) return;
+
+          activeGithubFilePath = path;
+          
+          document.querySelectorAll('#workspaceFileTree > div').forEach(el => {
+            el.classList.remove('bg-indigo-600/10', 'text-indigo-300');
+            el.classList.add('text-zinc-400');
+          });
+          div.classList.add('bg-indigo-600/10', 'text-indigo-300');
+          div.classList.remove('text-zinc-400');
+
+          try {
+            const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`, {
+              headers: { 'Authorization': `token ${githubToken}` }
+            });
+            const fileData = await res.json();
+            githubCurrentSha = fileData.sha;
+            const content = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+            
+            codeInput.value = content;
+            updateLineNumbers();
+            updateHighlight();
+
+            const targetCodeHeader = document.getElementById('targetCodeHeader');
+            const langBadge = document.getElementById('langBadge');
+            if (targetCodeHeader && langBadge) {
+              const ext = path.split('.').pop().toUpperCase();
+              targetCodeHeader.textContent = `Target Code Snippet`;
+              langBadge.classList.remove('hidden');
+              const extMap = {
+                'PY': 'PYTHON', 'JS': 'JAVASCRIPT', 'TS': 'TYPESCRIPT', 
+                'JSX': 'REACT', 'TSX': 'REACT TS', 'CPP': 'C++', 
+                'CC': 'C++', 'CXX': 'C++', 'C': 'C', 'GO': 'GO', 
+                'RS': 'RUST', 'PHP': 'PHP', 'CS': 'C#', 'HTML': 'HTML', 
+                'CSS': 'CSS', 'SQL': 'SQL', 'JSON': 'JSON', 'JAVA': 'JAVA'
+              };
+              langBadge.textContent = extMap[ext] || ext;
+            }
+
+            document.querySelectorAll('.preset-btn').forEach(b => {
+              b.classList.remove('bg-indigo-600', 'text-white');
+              b.classList.add('bg-zinc-800', 'text-zinc-300');
+            });
+            currentPreset = null;
+          } catch (err) {
+            alert('Failed to load file content.');
+          }
+        });
+        
+        workspaceFileTree.appendChild(div);
+      });
+    };
+
+    document.getElementById('hideLibsToggle').addEventListener('change', (e) => {
+      document.getElementById('hideLibsToggleText').textContent = e.target.checked ? "Hide Libraries & DB Files" : "Show All Files";
+      renderWorkspaceTree();
+    });
+    document.getElementById('customFilterInput').addEventListener('input', renderWorkspaceTree);
+
     const loadGithubFiles = async (repo, branch) => {
-      githubFileSelect.disabled = false;
-      githubFileSelect.innerHTML = '<option value="">Loading files...</option>';
+      activeGithubFilePath = null;
+      const workspaceFileTree = document.getElementById('workspaceFileTree');
+      const filterControls = document.getElementById('filterControls');
+      
+      workspaceFileTree.innerHTML = '<div class="text-zinc-500 text-xs p-4 text-center">Loading files...</div>';
+      filterControls.classList.remove('hidden');
+      
       try {
         const res = await fetch(`https://api.github.com/repos/${repo}/git/trees/${branch}?recursive=1`, {
           headers: { 'Authorization': `token ${githubToken}` }
         });
         const tree = await res.json();
-        githubFileSelect.innerHTML = '<option value="">Select Source File...</option>';
-        const supportedExtensions = ['.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', '.go', '.rs', '.php', '.cs', '.html', '.css', '.sql', '.json'];
-        const files = tree.tree.filter(f => f.type === 'blob' && supportedExtensions.some(ext => f.path.endsWith(ext)));
-        files.forEach(f => {
-          const opt = document.createElement('option');
-          opt.value = f.path;
-          opt.textContent = f.path;
-          githubFileSelect.appendChild(opt);
-        });
+        
+        githubTreeCache = tree.tree.filter(f => f.type === 'blob');
+        renderWorkspaceTree();
       } catch (err) {
-        githubFileSelect.innerHTML = '<option value="">Error loading files</option>';
+        workspaceFileTree.innerHTML = '<div class="text-red-500 text-xs p-4 text-center">Error loading files</div>';
       }
     };
-
-    githubFileSelect.addEventListener('change', async (e) => {
-      const path = e.target.value;
-      const repo = githubRepoSelect.value;
-      const branch = githubBranchSelect.value;
-      if (!path || !repo || !branch) return;
-      
-      try {
-        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`, {
-          headers: { 'Authorization': `token ${githubToken}` }
-        });
-        const fileData = await res.json();
-        githubCurrentSha = fileData.sha;
-        const content = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
-        
-        // Populate code editor
-        codeInput.value = content;
-        updateLineNumbers();
-        updateHighlight();
-
-        const targetCodeHeader = document.getElementById('targetCodeHeader');
-        const langBadge = document.getElementById('langBadge');
-        if (targetCodeHeader && langBadge) {
-          const ext = path.split('.').pop().toUpperCase();
-          targetCodeHeader.textContent = `Target Code Snippet`;
-          langBadge.classList.remove('hidden');
-          const extMap = {
-            'PY': 'PYTHON', 'JS': 'JAVASCRIPT', 'TS': 'TYPESCRIPT', 
-            'JSX': 'REACT', 'TSX': 'REACT TS', 'CPP': 'C++', 
-            'CC': 'C++', 'CXX': 'C++', 'C': 'C', 'GO': 'GO', 
-            'RS': 'RUST', 'PHP': 'PHP', 'CS': 'C#', 'HTML': 'HTML', 
-            'CSS': 'CSS', 'SQL': 'SQL', 'JSON': 'JSON', 'JAVA': 'JAVA'
-          };
-          langBadge.textContent = extMap[ext] || ext;
-        }
-
-        // Clear active presets
-        document.querySelectorAll('.preset-btn').forEach(b => {
-          b.classList.remove('bg-indigo-600', 'text-white');
-          b.classList.add('bg-zinc-800', 'text-zinc-300');
-        });
-        currentPreset = null;
-      } catch (err) {
-        alert('Failed to load file content.');
-      }
-    });
 
     // Commit logic
     const openCommitModal = () => {
@@ -913,10 +1359,32 @@ Do not include any markdown formatting outside the JSON block.`;
     cancelCommitModalBtn.addEventListener('click', closeCommitModal);
     commitModalBackdrop.addEventListener('click', closeCommitModal);
 
+    const closeGithubErrorModal = () => {
+      githubErrorModal.classList.add('opacity-0');
+      githubErrorModalContent.classList.remove('scale-100');
+      githubErrorModalContent.classList.add('scale-95');
+      setTimeout(() => {
+        githubErrorModal.classList.add('hidden');
+      }, 300);
+    };
+
+    closeGithubErrorModalBtn.addEventListener('click', closeGithubErrorModal);
+    understoodGithubErrorBtn.addEventListener('click', closeGithubErrorModal);
+    githubErrorModalBackdrop.addEventListener('click', closeGithubErrorModal);
+
+    const openGithubErrorModal = () => {
+      githubErrorModal.classList.remove('hidden');
+      setTimeout(() => {
+        githubErrorModal.classList.remove('opacity-0');
+        githubErrorModalContent.classList.remove('scale-95');
+        githubErrorModalContent.classList.add('scale-100');
+      }, 10);
+    };
+
     confirmPushBtn.addEventListener('click', async () => {
       const repo = githubRepoSelect.value;
       const branch = githubBranchSelect.value;
-      const path = githubFileSelect.value;
+      const path = activeGithubFilePath;
       const msg = commitMessageInput.value;
       
       if (!repo || !branch || !path) {
@@ -948,8 +1416,13 @@ Do not include any markdown formatting outside the JSON block.`;
           alert('Successfully pushed to GitHub!');
           closeCommitModal();
         } else {
-          const errorData = await res.json();
-          alert('Error: ' + errorData.message);
+          if (res.status === 403) {
+            closeCommitModal();
+            openGithubErrorModal();
+          } else {
+            const errorData = await res.json();
+            alert('Error: ' + errorData.message);
+          }
         }
       } catch (err) {
         alert('Failed to push to GitHub.');
