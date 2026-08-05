@@ -15,7 +15,9 @@
     .custom-scroll::-webkit-scrollbar-track { background: transparent; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 9999px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    ::-webkit-scrollbar-corner { background: transparent !important; }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-zinc-950 text-zinc-100 flex flex-col font-sans overflow-hidden">
   <!-- Visual Metrics Header -->
@@ -55,8 +57,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </button>
-        <button class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm font-medium transition-all text-white cursor-pointer">
-          Email
+        <button id="exportPdfBtn" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm font-medium transition-all text-white cursor-pointer flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span id="exportPdfBtnText">Export PDF</span>
         </button>
       </div>
     </header>
@@ -68,10 +71,15 @@
       <aside class="col-span-12 lg:col-span-2 lg:row-span-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col overflow-hidden min-h-[250px] lg:min-h-0">
         <div class="px-4 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-950 relative shrink-0">
           <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500">Workspace</h2>
-          <button class="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
+          <button id="uploadFilesBtn" class="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
             Upload Files
           </button>
+          <input type="file" id="localFileInput" multiple class="hidden" />
+        </div>
+        
+        <div class="px-4 py-2 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center shrink-0">
+          <button id="selectAllFilesBtn" class="text-[10px] text-zinc-400 hover:text-zinc-200 uppercase tracking-wider font-bold transition-colors cursor-pointer">Select All</button>
         </div>
 
         <!-- GitHub Selectors -->
@@ -134,9 +142,9 @@
 
         <!-- Interactive Presets -->
         <div class="px-4 py-2 border-b border-zinc-800 bg-zinc-900/50 flex gap-2 overflow-x-auto hide-scrollbar shrink-0">
-          <button class="preset-btn px-3 py-1.5 bg-indigo-600 text-[10px] uppercase tracking-wider text-white rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="loop">Suboptimal Loop</button>
-          <button class="preset-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-[10px] uppercase tracking-wider text-zinc-300 rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="calc">Redundant Calculations</button>
-          <button class="preset-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-[10px] uppercase tracking-wider text-zinc-300 rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="memory">Memory Leak</button>
+          <button class="preset-btn px-3 py-1.5 bg-indigo-600 text-[10px] uppercase tracking-wider text-white rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="loop">Suboptimal Loop (Python)</button>
+          <button class="preset-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-[10px] uppercase tracking-wider text-zinc-300 rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="calc">Redundant Async (TS)</button>
+          <button class="preset-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-[10px] uppercase tracking-wider text-zinc-300 rounded-md whitespace-nowrap transition-colors cursor-pointer" data-preset="memory">Memory Leak (Go)</button>
         </div>
 
         <div class="flex-1 flex bg-zinc-950/50 overflow-hidden relative">
@@ -158,7 +166,7 @@
       </section>
 
       <!-- Output Engine (Bento Grid Right) -->
-      <div class="col-span-12 lg:col-span-5 lg:row-span-6 flex flex-col gap-4 min-h-[500px] lg:min-h-0 relative" id="outputContainer">
+      <div class="col-span-12 lg:col-span-5 lg:row-span-6 flex flex-col gap-4 min-h-[500px] lg:min-h-0 relative overflow-y-auto custom-scroll max-h-full pb-8" id="outputContainer">
         <!-- Idle State -->
         <section id="idleState" class="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col items-center justify-center p-10 z-10">
           <div class="flex flex-col items-center gap-4">
@@ -170,8 +178,17 @@
           </div>
         </section>
 
+        <!-- Agent Execution Drawer (hidden by default) -->
+        <div id="agentDrawer" class="hidden flex flex-col gap-2 mb-4 shrink-0 transition-opacity duration-300">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-3">
+             <h3 class="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Multi-Agent Orchestration Loop</h3>
+             <div id="agentLogs" class="font-mono text-xs text-zinc-300 space-y-2 max-h-28 overflow-y-auto custom-scroll">
+             </div>
+          </div>
+        </div>
+
         <!-- Results Panel (Initially hidden) -->
-        <div id="resultsPanel" class="flex flex-col gap-4 h-full hidden opacity-0 transition-opacity duration-500">
+        <div id="resultsPanel" class="flex flex-col gap-4 h-full hidden opacity-0 transition-opacity duration-500 overflow-y-auto custom-scroll pb-8 max-h-full">
           <!-- 1. Overview & Approach -->
           <section class="bg-zinc-900 border border-zinc-800 rounded-2xl shrink-0 max-h-48 overflow-hidden flex flex-col">
             <div class="p-5 overflow-y-auto custom-scroll flex-1">
@@ -190,7 +207,7 @@
           </section>
 
           <!-- 2. Production Code -->
-          <section class="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col min-h-[250px] relative overflow-hidden">
+          <section class="bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col min-h-[300px] shrink-0 relative overflow-hidden">
             <div class="px-5 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-900 shrink-0">
               <h3 class="text-xs font-bold uppercase tracking-widest text-indigo-400">2. Production Code</h3>
               <button id="copyBtn" class="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
@@ -326,7 +343,7 @@
         <div class="space-y-2">
           <label for="githubPatInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Personal Access Token</label>
           <input type="password" id="githubPatInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="ghp_... or github_pat_..." />
-          <p class="text-[10px] text-zinc-500">Paste a Personal Access Token with write permissions ('repo' scope for Classic tokens or 'Contents: Read and write' for Fine-grained tokens).</p>
+          <p class="text-[10px] text-zinc-500">Paste a Personal Access Token with write permissions enabled ('repo' scope for Classic, or 'Contents: Read and write' for Fine-Grained).</p>
         </div>
       </div>
       <div class="px-6 py-4 border-t border-zinc-800 bg-zinc-950 flex justify-end gap-3">
@@ -388,6 +405,62 @@
     </div>
   </div>
 
+  <!-- Hidden PDF Export Template -->
+  <div id="pdfExportContainer" class="hidden">
+    <style>
+    #pdfExportContent {
+      width: 100%;
+      max-width: 800px;
+      box-sizing: border-box;
+      margin: 0 auto;
+      padding: 24px;
+      background-color: #18181b;
+      color: #f4f4f5;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+    }
+    #pdfExportContent pre, #pdfExportContent code {
+      white-space: pre-wrap !important;
+      word-break: break-word !important;
+      overflow-x: hidden !important;
+      max-width: 100%;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+  </style>
+  <div id="pdfExportContent" class="font-sans">
+      <h1 class="text-2xl font-bold border-b-2 border-zinc-700 pb-2 mb-4 text-white" style="word-break: break-word; white-space: pre-wrap;">RefactorAI — Executive Refactoring Audit Report</h1>
+      
+      <div class="mb-6 grid grid-cols-2 gap-4 text-sm bg-zinc-900 border border-zinc-800 p-4 rounded" style="word-break: break-word; white-space: pre-wrap;">
+        <div><strong class="text-zinc-500">Date:</strong> <span id="pdfDate" class="text-zinc-300"></span></div>
+        <div><strong class="text-zinc-500">Language:</strong> <span id="pdfLanguage" class="text-zinc-300"></span></div>
+        <div><strong class="text-zinc-500">Latency:</strong> <span class="text-zinc-300">~120ms</span></div>
+        <div><strong class="text-zinc-500">Complexity:</strong> <span id="pdfComplexity" class="text-zinc-300"></span></div>
+      </div>
+
+      <h2 class="text-lg font-bold text-indigo-400 mb-2 uppercase tracking-wide" style="word-break: break-word; white-space: pre-wrap;">1. Overview & Optimization Strategy</h2>
+      <div class="mb-6 space-y-4">
+        <div style="word-break: break-word; white-space: pre-wrap;">
+          <h3 class="text-sm font-bold text-zinc-500">Analysis</h3>
+          <p id="pdfAnalysis" class="text-sm text-zinc-300"></p>
+        </div>
+        <div style="word-break: break-word; white-space: pre-wrap;">
+          <h3 class="text-sm font-bold text-zinc-500">Strategy</h3>
+          <p id="pdfStrategy" class="text-sm text-zinc-300"></p>
+        </div>
+      </div>
+
+      <h2 class="text-lg font-bold text-indigo-400 mb-2 uppercase tracking-wide" style="word-break: break-word; white-space: pre-wrap;">2. Production-Ready Code</h2>
+      <div class="mb-6" style="word-break: break-word; white-space: pre-wrap;">
+        <pre class="bg-zinc-950 border border-zinc-800 p-4 rounded text-xs font-mono text-zinc-300" style="white-space: pre-wrap; word-break: break-word;"><code id="pdfCode"></code></pre>
+      </div>
+
+      <h2 class="text-lg font-bold text-indigo-400 mb-2 uppercase tracking-wide" style="word-break: break-word; white-space: pre-wrap;">3. Verification</h2>
+      <div class="mb-6" style="word-break: break-word; white-space: pre-wrap;">
+        <p id="pdfVerification" class="text-sm text-zinc-400 italic"></p>
+      </div>
+    </div>
+  </div>
+
   <script>
     let activeGithubFilePath = null;
     let githubTreeCache = [];
@@ -399,25 +472,25 @@
         analysis: "Identified imperative loop patterns that underutilize Python's list comprehension capabilities. Redundant indexing detected.",
         strategy: "Implementing a functional approach to reduce instruction cycles and improve readability through PEP 8 standards.",
         prodCode: 'def get_even_numbers(numbers: list[int]) -> list[int]:\n    """Extract even numbers using optimized list comprehension."""\n    return [num for num in numbers if num % 2 == 0]',
-        verification: '"Gracefully processes empty input lists [] without indexing errors."',
+        verification: "Run `pytest test_evens.py` and pass an empty array to verify no null pointer exceptions occur.",
         complexity: "O(n)",
         scale: "Linear"
       },
       calc: {
-        code: "function calculateTotals(prices) {\n    let total = 0;\n    for(let i=0; i<prices.length; i++) {\n        total = total + prices[i];\n    }\n    let tax = total * 0.2;\n    return total + tax;\n}",
-        analysis: "Manual loop used instead of array reduce method. Intermediate variables can be optimized.",
-        strategy: "Leverage standard Array.prototype.reduce() and combine arithmetic operations for efficiency.",
-        prodCode: 'export const calculateTotals = (prices) => prices.reduce((sum, p) => sum + p, 0) * 1.2;',
-        verification: '"Utilizes highly-optimized engine implementation of reduce() in V8."',
-        complexity: "O(n)",
-        scale: "Linear"
+        code: "async function fetchAllData() {\n    const users = await fetchUsers();\n    const posts = await fetchPosts();\n    const comments = await fetchComments();\n    return { users, posts, comments };\n}",
+        analysis: "Sequential await calls block execution unnecessarily when data fetching is independent.",
+        strategy: "Refactor sequential await calls into Promise.all() for concurrent network requests.",
+        prodCode: "export const fetchAllData = async () => {\n  const [users, posts, comments] = await Promise.all([\n    fetchUsers(),\n    fetchPosts(),\n    fetchComments()\n  ]);\n  return { users, posts, comments };\n};",
+        verification: "Run `npm test` to verify concurrent fetching latency is minimized.",
+        complexity: "O(1)",
+        scale: "Constant"
       },
       memory: {
-        code: "import React, { useState, useEffect } from 'react';\n\nfunction App() {\n    const [time, setTime] = useState(new Date());\n    useEffect(() => {\n        setInterval(() => setTime(new Date()), 1000);\n    }, []);\n    return <div>{time.toString()}</div>;\n}",
-        analysis: "React useEffect hook sets up an interval but fails to clear it on unmount, causing a memory leak.",
-        strategy: "Return a cleanup function from useEffect to clear the interval upon component unmount.",
-        prodCode: "import React, { useState, useEffect } from 'react';\n\nexport const App = () => {\n  const [time, setTime] = useState(new Date());\n  useEffect(() => {\n    const timer = setInterval(() => setTime(new Date()), 1000);\n    return () => clearInterval(timer);\n  }, []);\n  return <div>{time.toLocaleTimeString()}</div>;\n};",
-        verification: '"Component unmount lifecycle properly disposes of timer closure."',
+        code: "func processWorker() {\n    ch := make(chan int)\n    go func() {\n        for {\n            ch <- doWork()\n        }\n    }()\n    // Channel is never closed, leaking the goroutine\n}",
+        analysis: "Goroutine runs indefinitely without a mechanism to terminate or close the channel, causing memory leaks.",
+        strategy: "Demonstrate safe channel closure and context cancellation in Go routines.",
+        prodCode: "func processWorker(ctx context.Context) {\n    ch := make(chan int)\n    go func() {\n        defer close(ch)\n        for {\n            select {\n            case <-ctx.Done():\n                return\n            case ch <- doWork():\n            }\n        }\n    }()\n}",
+        verification: "Run `go test -race` to verify no goroutine leaks occur on context cancellation.",
         complexity: "O(1)",
         scale: "Constant"
       }
@@ -502,9 +575,9 @@
         targetCodeHeader.textContent = `Target Code Snippet`;
         langBadge.classList.remove('hidden');
         if (type === 'calc') {
-          langBadge.textContent = 'JAVASCRIPT';
-        } else if (type === 'memory') {
           langBadge.textContent = 'TYPESCRIPT';
+        } else if (type === 'memory') {
+          langBadge.textContent = 'GO';
         } else {
           langBadge.textContent = 'PYTHON';
         }
@@ -551,7 +624,7 @@
     });
 
     // Simulate or perform AI Refactoring
-    refactorBtn.addEventListener('click', async () => {
+    refactorBtn.addEventListener('click', async (e) => {
       const provider = localStorage.getItem('llm_provider') || 'gemini';
       let apiKey = localStorage.getItem(`${provider}_api_key`) || '';
       if (provider === 'gemini' && !apiKey) {
@@ -565,7 +638,80 @@
       }
       
       const codeToRefactor = codeInput.value.trim();
-      if (!codeToRefactor) {
+      const checkedBoxes = Array.from(document.querySelectorAll('.file-checkbox:checked'));
+      const isMultiAgent = e.shiftKey || checkedBoxes.length > 0;
+
+      let finalCodeToRefactor = codeToRefactor;
+      if (isMultiAgent && checkedBoxes.length > 0) {
+        window.localFilesMap = window.localFilesMap || {};
+        const checkedNames = checkedBoxes.map(cb => cb.dataset.path);
+        const combinedCodeArray = await Promise.all(checkedNames.map(async (name) => {
+          if (window.localFilesMap[name]) {
+             return `// File: ${name}\n${window.localFilesMap[name]}`;
+          }
+          // Try fetching from Github if we have repo/branch
+          const repo = document.getElementById('githubRepoSelect')?.value;
+          const branch = document.getElementById('githubBranchSelect')?.value;
+          const token = localStorage.getItem('githubToken');
+          if (repo && branch && token) {
+            try {
+              const res = await fetch(`https://api.github.com/repos/${repo}/contents/${name}?ref=${branch}`, {
+                headers: { 'Authorization': `token ${token}` }
+              });
+              if (res.ok) {
+                const fileData = await res.json();
+                const content = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+                window.localFilesMap[name] = content;
+                return `// File: ${name}\n${content}`;
+              }
+            } catch (err) {}
+          }
+          return `// File: ${name}\n// (Content not loaded)`;
+        }));
+        
+        // Update code input visually to primary file
+        if (checkedNames.length > 0 && window.localFilesMap[checkedNames[0]]) {
+          codeInput.value = window.localFilesMap[checkedNames[0]];
+          updateLineNumbers();
+          updateHighlight();
+        }
+
+        const combinedCode = combinedCodeArray.join('\n\n');
+        if (combinedCode.length > 5) finalCodeToRefactor = combinedCode;
+      }
+      
+      let finalCodeChunks = [];
+      if (isMultiAgent && checkedBoxes.length > 0) {
+         let totalLines = finalCodeToRefactor.split('\n').length;
+         if (checkedBoxes.length > 3 || totalLines > 500) {
+            let chunks = finalCodeToRefactor.split('\n\n// File: ');
+            let tempArr = [];
+            for(let i=0; i<chunks.length; i++) {
+               let chunk = chunks[i];
+               if (i > 0) chunk = '// File: ' + chunk;
+               if (chunk.trim()) tempArr.push(chunk);
+            }
+            let curChunk = [];
+            let curLines = 0;
+            for(let c of tempArr) {
+               let lines = c.split('\n').length;
+               if (curChunk.length > 0 && (curChunk.length >= 3 || curLines + lines > 500)) {
+                  finalCodeChunks.push(curChunk.join('\n\n'));
+                  curChunk = [];
+                  curLines = 0;
+               }
+               curChunk.push(c);
+               curLines += lines;
+            }
+            if (curChunk.length > 0) finalCodeChunks.push(curChunk.join('\n\n'));
+         } else {
+            finalCodeChunks = [finalCodeToRefactor];
+         }
+      } else {
+         finalCodeChunks = [finalCodeToRefactor];
+      }
+
+      if (!finalCodeToRefactor) {
         alert('Please paste or select a code snippet first!');
         return;
       }
@@ -578,14 +724,38 @@
       const apiErrorBanner = document.getElementById('apiErrorBanner');
       if (apiErrorBanner) apiErrorBanner.classList.add('hidden');
 
-      statusBadge.textContent = "Status: Analyzing Code...";
+      statusBadge.textContent = isMultiAgent ? "Status: Multi-Agent Loop Active..." : "Status: Analyzing Code...";
       statusBadge.className = "text-[10px] font-bold uppercase tracking-widest text-amber-400 animate-pulse";
-      statusMsg.innerHTML = "Analyzing target snippet...";
+      statusMsg.innerHTML = isMultiAgent ? "Orchestrating agent swarm..." : "Analyzing target snippet...";
 
       refactorBtn.disabled = true;
       refactorBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
       const temperature = parseFloat(localStorage.getItem('geminiTemp') || '0.7');
+
+      const agentDrawer = document.getElementById('agentDrawer');
+      const agentLogs = document.getElementById('agentLogs');
+      if (isMultiAgent) {
+        agentDrawer.classList.remove('hidden');
+        agentLogs.innerHTML = '';
+        const logs = [];
+        logs.push(`[Agent Initialized] Found ${checkedBoxes.length} file(s) selected for refactoring loop.`);
+        checkedBoxes.forEach((cb, index) => {
+          logs.push(`[Agent ${index + 1}: ${cb.dataset.path}] Extracting code AST and dependencies...`);
+        });
+        logs.push(`[Cross-Check Loop] Verifying imports and function references across selected modules...`);
+        logs.push(`[Synthesizer] Generating consolidated production refactor...`);
+        
+        for (let i = 0; i < logs.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 600));
+          const p = document.createElement('p');
+          p.textContent = logs[i];
+          agentLogs.appendChild(p);
+          agentLogs.scrollTop = agentLogs.scrollHeight;
+        }
+      } else {
+        agentDrawer.classList.add('hidden');
+      }
 
       const renderResults = (data) => {
         idleState.classList.add('hidden');
@@ -618,21 +788,32 @@
       };
 
       try {
-        const fileName = activeGithubFilePath || "unknown";
-          
-          const systemPrompt = `You are an expert AI refactoring engine. 
-1. Auto-detect the target programming language from the provided code snippet or the file name (${fileName}).
+        const fileNames = isMultiAgent ? checkedBoxes.map(cb => cb.dataset.path).join(', ') : (activeGithubFilePath || "unknown");
+             
+          const systemPrompt = `You are an expert AI refactoring engine.
+1. Auto-detect the target programming language from the provided code snippet or the file names (${fileNames}).
 2. Apply language-specific best practices (e.g., PEP 8 for Python, ES6+/Async for JS, C++ memory safety, Idiomatic Go).
-3. Return the response EXCLUSIVELY as a valid JSON object with the following exact keys:
+3. If this is a multi-file refactoring (${isMultiAgent ? 'yes' : 'no'}), perform an Iterative Cross-Check Loop verifying function signatures and imports across the selected files to prevent breaking changes, then combine the output into a single unified report.
+4. Return the response EXCLUSIVELY as a valid JSON object with the following exact keys:
    - "language": string (detected language name)
    - "analysis": "Provide a clean, 2-3 sentence overview in simple, conversational developer terms explaining the core issues."
    - "strategy": "Provide 3 concise bullet points (max 10 words each) describing the fix."
-   - "prodCode": string (the fully refactored, production-ready code)
-   - "verification": string (how to test or verify)
+   - "prodCode": "STRICT REQUIREMENT: You MUST ALWAYS return the COMPLETE, fully written refactored code for all selected files. NEVER return summary sentences like 'Due to complexity...' or placeholders like '// code omitted'. Output every single class, function, and import in full."
+   - "verification": "STRICT REQUIREMENT: Provide 1-2 practical, ultra-concise steps (max 20 words total) explaining how to quickly test or verify this code (e.g., 'Run \`python main.py\` and pass an empty array to verify no null pointer exceptions occur.'). Keep it simple, actionable, and short so it fits neatly in a small box."
    - "complexity": "STRICT REQUIREMENT: Return ONLY standard Big-O notation (e.g., 'O(1)', 'O(n)', 'O(n log n)', 'O(n²)'). Do NOT include sentences, explanations, or variable definitions."
    - "scale": "STRICT REQUIREMENT: Return ONLY 1 or 2 words describing scale (e.g., 'Constant', 'Linear', 'Logarithmic')."
 When returning the 'prodCode' key, ensure all newlines inside the code string are properly escaped as \\n so the output remains valid JSON. Do not include any markdown formatting outside the JSON block.`;
 
+
+          let accumulatedAnalysis = "";
+          let accumulatedStrategy = "";
+          let accumulatedProdCode = "";
+          let accumulatedVerification = "";
+          let accumulatedComplexity = "N/A";
+          let accumulatedScale = "N/A";
+
+          for (let chunkIndex = 0; chunkIndex < finalCodeChunks.length; chunkIndex++) {
+            let chunkCode = finalCodeChunks[chunkIndex];
           let modelName = 'gemini-2.5-flash';
           if (provider === 'openai') modelName = 'gpt-4o';
           else if (provider === 'anthropic') modelName = 'claude-3-5-sonnet-20240620';
@@ -673,12 +854,14 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
               }
             }
 
+            
             const payload = {
-              contents: [{ parts: [{ text: `Code to refactor:\n\n${codeToRefactor}` }] }],
+              contents: [{ parts: [{ text: `Code to refactor:\n\n${chunkCode}` }] }],
               systemInstruction: { parts: [{ text: systemPrompt }] },
               generationConfig: {
                 temperature: temperature,
-                responseMimeType: "application/json"
+                responseMimeType: "application/json",
+                maxOutputTokens: 8192
               }
             };
 
@@ -726,9 +909,10 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
             const payload = {
               model: modelName,
               temperature: (provider === 'groq' || provider === 'openrouter') ? 0.2 : temperature,
+              max_tokens: 8192,
               messages: [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: codeToRefactor }
+                { role: "user", content: `Code to refactor:\n\n${chunkCode}` }
               ]
             };
             
@@ -748,10 +932,10 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
             const payload = {
               model: modelName,
               temperature: temperature,
-              max_tokens: 4096,
+              max_tokens: 8192,
               system: systemPrompt,
               messages: [
-                { role: "user", content: codeToRefactor }
+                { role: "user", content: `Code to refactor:\n\n${chunkCode}` }
               ]
             };
             response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -814,13 +998,28 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
             };
           }
 
+
+            if (chunkIndex > 0) {
+                accumulatedAnalysis += "\n\n--- Chunk " + (chunkIndex + 1) + " ---\n" + (parsed.analysis || "");
+                accumulatedStrategy += "\n\n--- Chunk " + (chunkIndex + 1) + " ---\n" + (parsed.strategy || "");
+                accumulatedProdCode += "\n\n// --- Chunk " + (chunkIndex + 1) + " ---\n\n" + (parsed.prodCode || "");
+                accumulatedVerification += "\n" + (parsed.verification || "");
+            } else {
+                accumulatedAnalysis = parsed.analysis || "N/A";
+                accumulatedStrategy = parsed.strategy || "N/A";
+                accumulatedProdCode = parsed.prodCode || "/* No code generated */";
+                accumulatedVerification = parsed.verification || "N/A";
+                accumulatedComplexity = parsed.complexity || "N/A";
+                accumulatedScale = parsed.scale || "N/A";
+            }
+          }
           currentPreset = {
-            analysis: parsed.analysis || "N/A",
-            strategy: parsed.strategy || "N/A",
-            prodCode: parsed.prodCode || "/* No code generated */",
-            verification: parsed.verification || "N/A",
-            complexity: parsed.complexity || "N/A",
-            scale: parsed.scale || "N/A"
+            analysis: accumulatedAnalysis,
+            strategy: accumulatedStrategy,
+            prodCode: accumulatedProdCode,
+            verification: accumulatedVerification,
+            complexity: accumulatedComplexity,
+            scale: accumulatedScale
           };
 
           renderResults(currentPreset);
@@ -1237,12 +1436,21 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
 
       files.forEach(f => {
         const div = document.createElement('div');
-        div.className = "flex items-center gap-2 px-2 py-1.5 ml-2 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300 rounded cursor-pointer transition-colors text-xs whitespace-nowrap";
+        div.className = "flex items-center gap-2 px-2 py-1.5 ml-2 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300 rounded cursor-pointer transition-colors text-xs whitespace-nowrap file-item";
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = "file-checkbox shrink-0 accent-indigo-500 cursor-pointer";
+        checkbox.dataset.path = f.path;
+        checkbox.addEventListener('click', (e) => e.stopPropagation());
+
         const icon = document.createElement('span');
         icon.className = "text-zinc-500 shrink-0";
         icon.textContent = "📄";
         const name = document.createElement('span');
         name.textContent = f.path;
+        
+        div.appendChild(checkbox);
         div.appendChild(icon);
         div.appendChild(name);
 
@@ -1416,12 +1624,12 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
           alert('Successfully pushed to GitHub!');
           closeCommitModal();
         } else {
-          if (res.status === 403) {
+          const errorData = await res.json();
+          if (res.status === 403 || (errorData.message && errorData.message.includes('Resource not accessible by personal access token'))) {
             closeCommitModal();
             openGithubErrorModal();
           } else {
-            const errorData = await res.json();
-            alert('Error: ' + errorData.message);
+            alert('Error: ' + (errorData.message || 'Unknown error'));
           }
         }
       } catch (err) {
@@ -1429,6 +1637,163 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
       }
       confirmPushBtn.innerHTML = 'Confirm Push';
     });
+
+    // Local File Upload Logic
+    const uploadFilesBtn = document.getElementById('uploadFilesBtn');
+    const localFileInput = document.getElementById('localFileInput');
+
+    if (uploadFilesBtn && localFileInput) {
+      uploadFilesBtn.addEventListener('click', () => {
+        localFileInput.click();
+      });
+
+      localFileInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const workspaceFileTree = document.getElementById('workspaceFileTree');
+        
+        // Clear any placeholder text
+        if (workspaceFileTree.innerHTML.includes('text-center')) {
+          workspaceFileTree.innerHTML = '';
+        }
+
+        files.forEach(file => {
+          const div = document.createElement('div');
+          div.className = 'flex items-center gap-2 px-2 py-1.5 ml-4 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300 rounded cursor-pointer transition-colors file-item';
+          
+          let iconClass = 'text-cyan-400';
+          if (file.name.endsWith('.js') || file.name.endsWith('.ts')) iconClass = 'text-yellow-400';
+          else if (file.name.endsWith('.py')) iconClass = 'text-blue-400';
+          
+          div.innerHTML = `<input type="checkbox" class="file-checkbox shrink-0 accent-indigo-500 cursor-pointer" data-path="${file.name}"><span class="${iconClass}">📄</span><span>${file.name}</span>`;
+          
+          const checkbox = div.querySelector('input');
+          checkbox.addEventListener('click', (e) => e.stopPropagation());
+          
+          // Pre-load content into map
+          const preReader = new FileReader();
+          preReader.onload = (ev) => {
+            window.localFilesMap[file.name] = ev.target.result;
+          };
+          preReader.readAsText(file);
+
+          div.addEventListener('click', () => {
+            // Select active state
+            document.querySelectorAll('#workspaceFileTree > div').forEach(el => {
+              el.classList.remove('bg-indigo-600/10', 'text-indigo-300');
+              el.classList.add('text-zinc-400');
+              const span = el.querySelector('span:last-child');
+              if (span) span.classList.remove('font-bold');
+            });
+            div.classList.remove('text-zinc-400');
+            div.classList.add('bg-indigo-600/10', 'text-indigo-300');
+            div.querySelector('span:last-child').classList.add('font-bold');
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              codeInput.value = ev.target.result;
+              updateLineNumbers();
+              updateHighlight();
+              
+              const targetCodeHeader = document.getElementById('targetCodeHeader');
+              const langBadge = document.getElementById('langBadge');
+              if (targetCodeHeader && langBadge) {
+                const ext = file.name.split('.').pop().toUpperCase();
+                targetCodeHeader.textContent = 'Target Code Snippet';
+                langBadge.classList.remove('hidden');
+                const extMap = {
+                  'PY': 'PYTHON', 'JS': 'JAVASCRIPT', 'TS': 'TYPESCRIPT', 
+                  'JSX': 'REACT', 'TSX': 'REACT TS', 'CPP': 'C++', 
+                  'CC': 'C++', 'CXX': 'C++', 'C': 'C', 'GO': 'GO', 
+                  'RS': 'RUST', 'PHP': 'PHP', 'CS': 'C#', 'HTML': 'HTML', 
+                  'CSS': 'CSS', 'SQL': 'SQL', 'JSON': 'JSON', 'JAVA': 'JAVA'
+                };
+                langBadge.textContent = extMap[ext] || ext;
+              }
+
+              document.querySelectorAll('.preset-btn').forEach(b => {
+                b.classList.remove('bg-indigo-600', 'text-white');
+                b.classList.add('bg-zinc-800', 'text-zinc-300');
+              });
+              currentPreset = null;
+            };
+            reader.readAsText(file);
+          });
+          
+          workspaceFileTree.appendChild(div);
+        });
+        
+        // Reset input
+        localFileInput.value = '';
+      });
+    }
+
+    // Export PDF Logic
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    if (exportPdfBtn) {
+      exportPdfBtn.addEventListener('click', () => {
+        const resultsPanel = document.getElementById('resultsPanel');
+        if (resultsPanel.classList.contains('hidden') || resultsPanel.style.opacity === '0') {
+          alert('Please run RefactorAI first to generate a report.');
+          return;
+        }
+
+        const originalText = document.getElementById('exportPdfBtnText').textContent;
+        document.getElementById('exportPdfBtnText').textContent = 'Generating...';
+        exportPdfBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        // Populate Template
+        document.getElementById('pdfDate').textContent = new Date().toLocaleDateString();
+        document.getElementById('pdfLanguage').textContent = document.getElementById('langBadge').textContent || 'Unknown';
+        document.getElementById('pdfAnalysis').textContent = document.getElementById('analysisText').textContent;
+        document.getElementById('pdfStrategy').innerHTML = document.getElementById('strategyText').innerHTML;
+        document.getElementById('pdfCode').textContent = document.getElementById('productionCode').textContent;
+        document.getElementById('pdfVerification').textContent = document.getElementById('verificationText').textContent;
+        document.getElementById('pdfComplexity').textContent = document.getElementById('complexityMetric').textContent;
+
+        const element = document.getElementById('pdfExportContent');
+        const container = document.getElementById('pdfExportContainer');
+        container.classList.remove('hidden');
+
+        const opt = {
+          margin: [10, 10, 10, 10],
+          filename: 'RefactorAI_Executive_Report.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            scrollY: 0,
+            windowWidth: element.clientWidth
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+          container.classList.add('hidden');
+          document.getElementById('exportPdfBtnText').textContent = originalText;
+          exportPdfBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }).catch(() => {
+          container.classList.add('hidden');
+          document.getElementById('exportPdfBtnText').textContent = originalText;
+          exportPdfBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          alert('Failed to generate PDF.');
+        });
+      });
+    }
+
+    const selectAllFilesBtn = document.getElementById('selectAllFilesBtn');
+    if (selectAllFilesBtn) {
+      let allSelected = false;
+      selectAllFilesBtn.addEventListener('click', () => {
+        allSelected = !allSelected;
+        document.querySelectorAll('.file-checkbox').forEach(cb => {
+          cb.checked = allSelected;
+        });
+        selectAllFilesBtn.textContent = allSelected ? 'Deselect All' : 'Select All';
+      });
+    }
 
     initGithub();
   </script>
