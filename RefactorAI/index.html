@@ -17,7 +17,7 @@
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: #6366f1; }
     ::-webkit-scrollbar-corner { background: transparent !important; }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
 </head>
 <body class="bg-zinc-950 text-zinc-100 flex flex-col font-sans overflow-hidden">
   <!-- Visual Metrics Header -->
@@ -70,7 +70,7 @@
       <!-- Workspace File Explorer (Sidebar) -->
       <aside class="col-span-12 lg:col-span-2 lg:row-span-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col overflow-hidden min-h-[250px] lg:min-h-0">
         <div class="px-4 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-950 relative shrink-0">
-          <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500">Workspace</h2>
+          <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 flex flex-col gap-0.5">Workspace <span class="text-[9px] text-indigo-400 opacity-80">SHOWING: CODE FILES ONLY</span></h2>
           <button id="uploadFilesBtn" class="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
             Upload Files
@@ -182,7 +182,7 @@
         <div id="agentDrawer" class="hidden flex flex-col gap-2 mb-4 shrink-0 transition-opacity duration-300">
           <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-3">
              <h3 class="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Multi-Agent Orchestration Loop</h3>
-             <div id="agentLogs" class="font-mono text-xs text-zinc-300 space-y-2 max-h-28 overflow-y-auto custom-scroll">
+             <div id="multiAgentLogContainer" class="font-mono text-xs text-zinc-300 space-y-2 max-h-28 overflow-y-auto custom-scroll">
              </div>
           </div>
         </div>
@@ -193,14 +193,18 @@
           <section class="bg-zinc-900 border border-zinc-800 rounded-2xl shrink-0 max-h-48 overflow-hidden flex flex-col">
             <div class="p-5 overflow-y-auto custom-scroll flex-1">
               <h3 class="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3 shrink-0">1. Overview & Approach</h3>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-4">
                 <div class="space-y-2">
-                  <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Analysis</p>
-                  <p id="analysisText" class="text-sm text-zinc-300 leading-snug"></p>
+                  <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Code Purpose / Use Case</p>
+                  <p id="overviewPurpose" class="text-sm text-zinc-300 leading-snug"></p>
+                </div>
+                <div class="space-y-2 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
+                  <p class="text-[11px] font-bold text-red-400 uppercase tracking-tighter">Identified Issues & Anti-Patterns</p>
+                  <p id="overviewFlaws" class="text-sm text-red-300 leading-snug"></p>
                 </div>
                 <div class="space-y-2">
-                  <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Optimization Strategy</p>
-                  <p id="strategyText" class="text-sm text-zinc-300 leading-snug"></p>
+                  <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-tighter">Refactoring Approach</p>
+                  <p id="overviewApproach" class="text-sm text-zinc-300 leading-snug"></p>
                 </div>
               </div>
             </div>
@@ -293,6 +297,10 @@
         
 
 
+        <div id="modelContainer" class="space-y-2 hidden">
+          <label for="modelInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Model Slug (Optional)</label>
+          <input type="text" id="modelInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="e.g. deepseek/deepseek-r1" />
+        </div>
         <div id="baseUrlContainer" class="space-y-2 hidden">
           <label for="baseUrlInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-400">Base URL</label>
           <input type="text" id="baseUrlInput" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="http://localhost:11434/v1" />
@@ -405,62 +413,7 @@
     </div>
   </div>
 
-  <!-- Hidden PDF Export Template -->
-  <div id="pdfExportContainer" class="hidden">
-    <style>
-    #pdfExportContent {
-      width: 100%;
-      max-width: 800px;
-      box-sizing: border-box;
-      margin: 0 auto;
-      padding: 24px;
-      background-color: #18181b;
-      color: #f4f4f5;
-      font-family: ui-sans-serif, system-ui, sans-serif;
-    }
-    #pdfExportContent pre, #pdfExportContent code {
-      white-space: pre-wrap !important;
-      word-break: break-word !important;
-      overflow-x: hidden !important;
-      max-width: 100%;
-      font-size: 11px;
-      line-height: 1.4;
-    }
-  </style>
-  <div id="pdfExportContent" class="font-sans">
-      <h1 class="text-2xl font-bold border-b-2 border-zinc-700 pb-2 mb-4 text-white" style="word-break: break-word; white-space: pre-wrap;">RefactorAI — Executive Refactoring Audit Report</h1>
-      
-      <div class="mb-6 grid grid-cols-2 gap-4 text-sm bg-zinc-900 border border-zinc-800 p-4 rounded" style="word-break: break-word; white-space: pre-wrap;">
-        <div><strong class="text-zinc-500">Date:</strong> <span id="pdfDate" class="text-zinc-300"></span></div>
-        <div><strong class="text-zinc-500">Language:</strong> <span id="pdfLanguage" class="text-zinc-300"></span></div>
-        <div><strong class="text-zinc-500">Latency:</strong> <span class="text-zinc-300">~120ms</span></div>
-        <div><strong class="text-zinc-500">Complexity:</strong> <span id="pdfComplexity" class="text-zinc-300"></span></div>
-      </div>
-
-      <h2 class="text-lg font-bold text-indigo-400 mb-2 uppercase tracking-wide" style="word-break: break-word; white-space: pre-wrap;">1. Overview & Optimization Strategy</h2>
-      <div class="mb-6 space-y-4">
-        <div style="word-break: break-word; white-space: pre-wrap;">
-          <h3 class="text-sm font-bold text-zinc-500">Analysis</h3>
-          <p id="pdfAnalysis" class="text-sm text-zinc-300"></p>
-        </div>
-        <div style="word-break: break-word; white-space: pre-wrap;">
-          <h3 class="text-sm font-bold text-zinc-500">Strategy</h3>
-          <p id="pdfStrategy" class="text-sm text-zinc-300"></p>
-        </div>
-      </div>
-
-      <h2 class="text-lg font-bold text-indigo-400 mb-2 uppercase tracking-wide" style="word-break: break-word; white-space: pre-wrap;">2. Production-Ready Code</h2>
-      <div class="mb-6" style="word-break: break-word; white-space: pre-wrap;">
-        <pre class="bg-zinc-950 border border-zinc-800 p-4 rounded text-xs font-mono text-zinc-300" style="white-space: pre-wrap; word-break: break-word;"><code id="pdfCode"></code></pre>
-      </div>
-
-      <h2 class="text-lg font-bold text-indigo-400 mb-2 uppercase tracking-wide" style="word-break: break-word; white-space: pre-wrap;">3. Verification</h2>
-      <div class="mb-6" style="word-break: break-word; white-space: pre-wrap;">
-        <p id="pdfVerification" class="text-sm text-zinc-400 italic"></p>
-      </div>
-    </div>
-  </div>
-
+  
   <script>
     let activeGithubFilePath = null;
     let githubTreeCache = [];
@@ -469,8 +422,9 @@
     const presets = {
       loop: {
         code: "def get_even_numbers(numbers):\n    evens = []\n    for i in range(len(numbers)):\n        if numbers[i] % 2 == 0:\n            evens.append(numbers[i])\n    return evens",
-        analysis: "Identified imperative loop patterns that underutilize Python's list comprehension capabilities. Redundant indexing detected.",
-        strategy: "Implementing a functional approach to reduce instruction cycles and improve readability through PEP 8 standards.",
+        purpose: "Filters a list of numbers to extract only the even values.",
+        flaws: "Identified imperative loop patterns that underutilize Python's list comprehension capabilities. Redundant indexing detected.",
+        approach: "Implementing a functional approach to reduce instruction cycles and improve readability through PEP 8 standards.",
         prodCode: 'def get_even_numbers(numbers: list[int]) -> list[int]:\n    """Extract even numbers using optimized list comprehension."""\n    return [num for num in numbers if num % 2 == 0]',
         verification: "Run `pytest test_evens.py` and pass an empty array to verify no null pointer exceptions occur.",
         complexity: "O(n)",
@@ -478,8 +432,9 @@
       },
       calc: {
         code: "async function fetchAllData() {\n    const users = await fetchUsers();\n    const posts = await fetchPosts();\n    const comments = await fetchComments();\n    return { users, posts, comments };\n}",
-        analysis: "Sequential await calls block execution unnecessarily when data fetching is independent.",
-        strategy: "Refactor sequential await calls into Promise.all() for concurrent network requests.",
+        purpose: "Fetches user, post, and comment data sequentially from an API.",
+        flaws: "Sequential await calls block execution unnecessarily when data fetching is independent.",
+        approach: "Refactor sequential await calls into Promise.all() for concurrent network requests.",
         prodCode: "export const fetchAllData = async () => {\n  const [users, posts, comments] = await Promise.all([\n    fetchUsers(),\n    fetchPosts(),\n    fetchComments()\n  ]);\n  return { users, posts, comments };\n};",
         verification: "Run `npm test` to verify concurrent fetching latency is minimized.",
         complexity: "O(1)",
@@ -507,8 +462,8 @@
     const statusMsg = document.getElementById('statusMsg');
     
     // Output Elements
-    const analysisText = document.getElementById('analysisText');
-    const strategyText = document.getElementById('strategyText');
+    
+    
     const productionCode = document.getElementById('productionCode');
     const verificationText = document.getElementById('verificationText');
     const complexityMetric = document.getElementById('complexityMetric');
@@ -693,9 +648,11 @@
             }
             let curChunk = [];
             let curLines = 0;
+            let maxFilesPerChunk = provider === 'groq' ? 2 : 3;
+            let maxLinesPerChunk = provider === 'groq' ? 300 : 500;
             for(let c of tempArr) {
                let lines = c.split('\n').length;
-               if (curChunk.length > 0 && (curChunk.length >= 3 || curLines + lines > 500)) {
+               if (curChunk.length > 0 && (curChunk.length >= maxFilesPerChunk || curLines + lines > maxLinesPerChunk)) {
                   finalCodeChunks.push(curChunk.join('\n\n'));
                   curChunk = [];
                   curLines = 0;
@@ -734,10 +691,10 @@
       const temperature = parseFloat(localStorage.getItem('geminiTemp') || '0.7');
 
       const agentDrawer = document.getElementById('agentDrawer');
-      const agentLogs = document.getElementById('agentLogs');
+      const agentLogs = document.getElementById('multiAgentLogContainer');
       if (isMultiAgent) {
         agentDrawer.classList.remove('hidden');
-        agentLogs.innerHTML = '';
+        multiAgentLogContainer.innerHTML = '';
         const logs = [];
         logs.push(`[Agent Initialized] Found ${checkedBoxes.length} file(s) selected for refactoring loop.`);
         checkedBoxes.forEach((cb, index) => {
@@ -750,14 +707,68 @@
           await new Promise(resolve => setTimeout(resolve, 600));
           const p = document.createElement('p');
           p.textContent = logs[i];
-          agentLogs.appendChild(p);
-          agentLogs.scrollTop = agentLogs.scrollHeight;
+          multiAgentLogContainer.appendChild(p);
+          multiAgentLogContainer.scrollTop = multiAgentLogContainer.scrollHeight;
         }
       } else {
         agentDrawer.classList.add('hidden');
       }
 
-      const renderResults = (data) => {
+      
+    function compressCodeForPrompt(rawCode) {
+      if (!rawCode) return '';
+      let code = rawCode;
+      
+      // Strip multi-line comments
+      code = code.replace(/\/\*[\s\S]*?\*\//g, '');
+      code = code.replace(/\"\"\"[\s\S]*?\"\"\"/g, '');
+      code = code.replace(/\'\'\'[\s\S]*?\'\'\'/g, '');
+      
+      const lines = code.split('\n');
+      const compressedLines = [];
+      for (let line of lines) {
+        // Strip single line comments if they aren't obviously inside quotes (basic heuristic)
+        line = line.replace(/^\s*\/\/.*/, '');
+        line = line.replace(/^\s*#.*/, '');
+        // Trailing comments loosely matched
+        let cleanLine = line.replace(/\s+\/\/.*$/, '').replace(/\s+#.*$/, '').trimEnd();
+        // Reduce indentation spacing
+        cleanLine = cleanLine.replace(/^\s+/g, (match) => ' '.repeat(Math.max(1, Math.floor(match.length / 2))));
+        if (cleanLine.trim().length > 0) {
+          compressedLines.push(cleanLine);
+        }
+      }
+      return compressedLines.join('\n');
+    }
+
+    
+    function compressCodeForPrompt(rawCode) {
+      if (!rawCode) return '';
+      let code = rawCode;
+      
+      // Strip multi-line comments
+      code = code.replace(/\/\*[\s\S]*?\*\//g, '');
+      code = code.replace(/\"\"\"[\s\S]*?\"\"\"/g, '');
+      code = code.replace(/\'\'\'[\s\S]*?\'\'\'/g, '');
+      
+      const lines = code.split('\n');
+      const compressedLines = [];
+      for (let line of lines) {
+        // Strip single line comments if they aren't obviously inside quotes (basic heuristic)
+        line = line.replace(/^\s*\/\/.*/, '');
+        line = line.replace(/^\s*#.*/, '');
+        // Trailing comments loosely matched
+        let cleanLine = line.replace(/\s+\/\/.*$/, '').replace(/\s+#.*$/, '').trimEnd();
+        // Reduce indentation spacing
+        cleanLine = cleanLine.replace(/^\s+/g, (match) => ' '.repeat(Math.max(1, Math.floor(match.length / 2))));
+        if (cleanLine.trim().length > 0) {
+          compressedLines.push(cleanLine);
+        }
+      }
+      return compressedLines.join('\n');
+    }
+
+    const renderResults = (data) => {
         idleState.classList.add('hidden');
         resultsPanel.classList.remove('hidden');
         
@@ -768,8 +779,9 @@
         refactorBtn.disabled = false;
         refactorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-        analysisText.textContent = data.analysis;
-        strategyText.textContent = data.strategy;
+        document.getElementById('overviewPurpose').textContent = data.purpose;
+        document.getElementById('overviewFlaws').textContent = data.flaws;
+        document.getElementById('overviewApproach').textContent = data.approach;
         
         productionCode.innerHTML = highlightCode(data.prodCode);
         
@@ -796,8 +808,11 @@
 3. If this is a multi-file refactoring (${isMultiAgent ? 'yes' : 'no'}), perform an Iterative Cross-Check Loop verifying function signatures and imports across the selected files to prevent breaking changes, then combine the output into a single unified report.
 4. Return the response EXCLUSIVELY as a valid JSON object with the following exact keys:
    - "language": string (detected language name)
-   - "analysis": "Provide a clean, 2-3 sentence overview in simple, conversational developer terms explaining the core issues."
-   - "strategy": "Provide 3 concise bullet points (max 10 words each) describing the fix."
+   - "overview": {
+       "purpose": "MUST clearly state the exact functional purpose/use case of the code (e.g., 'Handles client socket communication and processes user download authentication requests').",
+       "flaws": "MUST list specific design anti-patterns, performance bottlenecks, or security risks present in the code—NEVER use generic phrases like 'it lacks best practices' or 'it is bad'. Specify the exact class, function, or loop issue.",
+       "approach": "MUST outline the exact refactoring strategy applied to resolve these specific flaws."
+     }
    - "prodCode": "STRICT REQUIREMENT: You MUST ALWAYS return the COMPLETE, fully written refactored code for all selected files. NEVER return summary sentences like 'Due to complexity...' or placeholders like '// code omitted'. Output every single class, function, and import in full."
    - "verification": "STRICT REQUIREMENT: Provide 1-2 practical, ultra-concise steps (max 20 words total) explaining how to quickly test or verify this code (e.g., 'Run \`python main.py\` and pass an empty array to verify no null pointer exceptions occur.'). Keep it simple, actionable, and short so it fits neatly in a small box."
    - "complexity": "STRICT REQUIREMENT: Return ONLY standard Big-O notation (e.g., 'O(1)', 'O(n)', 'O(n log n)', 'O(n²)'). Do NOT include sentences, explanations, or variable definitions."
@@ -805,28 +820,61 @@
 When returning the 'prodCode' key, ensure all newlines inside the code string are properly escaped as \\n so the output remains valid JSON. Do not include any markdown formatting outside the JSON block.`;
 
 
-          let accumulatedAnalysis = "";
-          let accumulatedStrategy = "";
+          let accumulatedPurpose = "";
+          let accumulatedFlaws = "";
+          let accumulatedApproach = "";
           let accumulatedProdCode = "";
           let accumulatedVerification = "";
           let accumulatedComplexity = "N/A";
           let accumulatedScale = "N/A";
 
+          // Dynamically cap tokens based on number of selected files to prevent long summaries
+          let selectedFilesCount = isMultiAgent && checkedBoxes ? checkedBoxes.length : 1;
+          const dynMaxTokens = Math.min(8192, 2048 + (selectedFilesCount * 1024));
+
           for (let chunkIndex = 0; chunkIndex < finalCodeChunks.length; chunkIndex++) {
-            let chunkCode = finalCodeChunks[chunkIndex];
+            let chunkCode = compressCodeForPrompt(finalCodeChunks[chunkIndex]);
+          let savedModel = localStorage.getItem('llm_model');
+          // Strict model enforcement per provider
           let modelName = 'gemini-2.5-flash';
-          if (provider === 'openai') modelName = 'gpt-4o';
-          else if (provider === 'anthropic') modelName = 'claude-3-5-sonnet-20240620';
-          else if (provider === 'groq') modelName = 'llama-3.3-70b-versatile';
-          else if (provider === 'openrouter') modelName = 'deepseek/deepseek-r1:free';
-          else if (provider === 'custom') modelName = 'custom-model';
+          if (provider === 'gemini') {
+            modelName = savedModel && savedModel.includes('gemini') ? savedModel : 'gemini-2.5-flash';
+          } else if (provider === 'openai') {
+            modelName = 'gpt-4o';
+          } else if (provider === 'anthropic') {
+            modelName = 'claude-3-5-sonnet-20240620';
+          } else if (provider === 'groq') {
+            let m = localStorage.getItem('groq_model');
+            if (!m && savedModel && (savedModel.includes('llama-') || savedModel.includes('mixtral') || savedModel.includes('gemma'))) { m = savedModel; }
+            modelName = m || 'llama-3.3-70b-versatile';
+          } else if (provider === 'openrouter') {
+            let m = localStorage.getItem('openrouter_model');
+            if (!m && savedModel && !savedModel.includes('versatile')) { m = savedModel; }
+            
+            // Auto-upgrade legacy deepseek free endpoints to valid slugs if they exist
+            if (m === 'deepseek/deepseek-r1:free' || m === 'deepseek/deepseek-coder:free') {
+               // keep as is, it's valid free model
+            } else if (m && m.includes('deepseek') && m.includes('free')) {
+               m = 'deepseek/deepseek-r1:free'; // fallback to valid free
+            }
+            
+            modelName = m || 'meta-llama/llama-3.3-70b-instruct:free';
+          } else if (provider === 'custom') {
+            modelName = localStorage.getItem('custom_model') || savedModel || 'custom-model';
+          }
           
           let baseUrl = localStorage.getItem('llm_baseurl') || 'http://localhost:11434/v1';
           if (provider === 'groq') baseUrl = 'https://api.groq.com/openai/v1';
           else if (provider === 'openrouter') baseUrl = 'https://openrouter.ai/api/v1';
           
           let response;
-          if (provider === 'gemini') {
+          let rawOutput = '';
+          let maxRetries = 3;
+          let retryCount = 0;
+          
+          while (retryCount <= maxRetries) {
+            try {
+              if (provider === 'gemini') {
             if (dynamicGeminiModels.length === 0) {
               try {
                 const modelRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
@@ -861,7 +909,7 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
               generationConfig: {
                 temperature: temperature,
                 responseMimeType: "application/json",
-                maxOutputTokens: 8192
+                maxOutputTokens: dynMaxTokens
               }
             };
 
@@ -899,6 +947,7 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
             }
             
             if (lastErrorDetails) {
+              if (lastErrorDetails.includes('429')) throw new Error('429 Rate Limit');
               throw new Error(lastErrorDetails);
             }
           } else if (provider === 'openai' || provider === 'custom' || provider === 'groq' || provider === 'openrouter') {
@@ -909,7 +958,7 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
             const payload = {
               model: modelName,
               temperature: (provider === 'groq' || provider === 'openrouter') ? 0.2 : temperature,
-              max_tokens: 8192,
+              max_tokens: dynMaxTokens,
               messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: `Code to refactor:\n\n${chunkCode}` }
@@ -932,7 +981,7 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
             const payload = {
               model: modelName,
               temperature: temperature,
-              max_tokens: 8192,
+              max_tokens: dynMaxTokens,
               system: systemPrompt,
               messages: [
                 { role: "user", content: `Code to refactor:\n\n${chunkCode}` }
@@ -967,7 +1016,6 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
           }
 
           const data = await response.json();
-          let rawOutput = '';
           if (provider === 'gemini') {
             rawOutput = data.candidates[0].content.parts[0].text;
           } else if (provider === 'openai' || provider === 'custom' || provider === 'groq' || provider === 'openrouter') {
@@ -975,8 +1023,28 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
           } else if (provider === 'anthropic') {
             rawOutput = data.content[0].text;
           }
+          break; // success, exit retry loop
+            } catch (e) {
+                if (e.message.includes('429') || (e.message.toLowerCase().includes('quota')) || (e.message.toLowerCase().includes('rate limit'))) {
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        const logsContainer = document.getElementById('multiAgentLogContainer');
+                        if (logsContainer) {
+                           const p = document.createElement('p');
+                           p.textContent = '[Rate Limit Throttling] TPM limit reached. Pausing for 8s before retrying batch...';
+                           p.className = 'text-amber-400 font-bold';
+                           logsContainer.appendChild(p);
+                           logsContainer.scrollTop = logsContainer.scrollHeight;
+                        }
+                        await new Promise(r => setTimeout(r, 8000));
+                        continue;
+                    }
+                }
+                throw e; // Exceeded retries or other error
+            }
+          } // End of retry loop
 
-          let jsonStr = rawOutput.replace(/```json/gi, '').replace(/```/g, '').trim();
+          let jsonStr = rawOutput.replace(/\`\`\`json/gi, '').replace(/\`\`\`/g, '').trim();
           
           let parsed;
           try {
@@ -989,8 +1057,8 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
             const codeMatch = rawOutput.match(/```(?:[\w]+)?\n([\s\S]*?)```/);
             const fallbackCode = codeMatch ? codeMatch[1].trim() : "/* JSON Parse Failed. Raw Output: */\n" + rawOutput;
             parsed = {
-              analysis: "JSON parsing failed. Showing extracted code.",
-              strategy: "Fallback Regex Extraction",
+              overview: { purpose: "JSON parsing failed. Showing extracted code.", flaws: "N/A", approach: "N/A" },
+              
               prodCode: fallbackCode,
               verification: "Manual verification required",
               complexity: "N/A",
@@ -1000,13 +1068,15 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
 
 
             if (chunkIndex > 0) {
-                accumulatedAnalysis += "\n\n--- Chunk " + (chunkIndex + 1) + " ---\n" + (parsed.analysis || "");
-                accumulatedStrategy += "\n\n--- Chunk " + (chunkIndex + 1) + " ---\n" + (parsed.strategy || "");
+                accumulatedPurpose += "\n\n--- Chunk " + (chunkIndex + 1) + " ---\n" + (parsed.overview?.purpose || "");
+                accumulatedFlaws += "\n\n--- Chunk " + (chunkIndex + 1) + " ---\n" + (parsed.overview?.flaws || "");
+                accumulatedApproach += "\n\n--- Chunk " + (chunkIndex + 1) + " ---\n" + (parsed.overview?.approach || "");
                 accumulatedProdCode += "\n\n// --- Chunk " + (chunkIndex + 1) + " ---\n\n" + (parsed.prodCode || "");
                 accumulatedVerification += "\n" + (parsed.verification || "");
             } else {
-                accumulatedAnalysis = parsed.analysis || "N/A";
-                accumulatedStrategy = parsed.strategy || "N/A";
+                accumulatedPurpose = parsed.overview?.purpose || "N/A";
+                accumulatedFlaws = parsed.overview?.flaws || "N/A";
+                accumulatedApproach = parsed.overview?.approach || "N/A";
                 accumulatedProdCode = parsed.prodCode || "/* No code generated */";
                 accumulatedVerification = parsed.verification || "N/A";
                 accumulatedComplexity = parsed.complexity || "N/A";
@@ -1014,8 +1084,9 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
             }
           }
           currentPreset = {
-            analysis: accumulatedAnalysis,
-            strategy: accumulatedStrategy,
+            purpose: accumulatedPurpose,
+            flaws: accumulatedFlaws,
+            approach: accumulatedApproach,
             prodCode: accumulatedProdCode,
             verification: accumulatedVerification,
             complexity: accumulatedComplexity,
@@ -1153,10 +1224,45 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
 
     providerSelect.addEventListener('change', (e) => {
       const p = e.target.value;
-      if (p === 'custom') {
+      const modelContainer = document.getElementById('modelContainer');
+      const modelInput = document.getElementById('modelInput');
+      
+      // Update model input and UI based on provider
+      if (p === 'custom' || p === 'groq' || p === 'openrouter') {
         baseUrlContainer.classList.remove('hidden');
+        if (modelContainer) modelContainer.classList.remove('hidden');
+        
+        // Clear or set placeholder
+        if (modelInput) {
+          if (p === 'groq') {
+            modelInput.placeholder = 'e.g. llama-3.3-70b-versatile';
+          } else if (p === 'openrouter') {
+            modelInput.placeholder = 'e.g. meta-llama/llama-3.3-70b-instruct:free';
+          } else {
+            modelInput.placeholder = 'e.g. custom-model';
+          }
+          // Also clear previous model string to prevent cross-provider ID mixing
+          // but we can preserve it if we load from localStorage for that provider
+          let savedModel = localStorage.getItem(p + '_model');
+          // Migration fallback
+          if (!savedModel && localStorage.getItem('llm_provider') === p) {
+             savedModel = localStorage.getItem('llm_model');
+             if (savedModel && savedModel !== 'meta-llama/llama-3.3-70b-instruct:free' && savedModel !== 'llama-3.3-70b-versatile' && savedModel !== 'custom-model') {
+                // it might be a custom string
+             } else {
+                savedModel = '';
+             }
+          }
+          if (savedModel) {
+            modelInput.value = savedModel;
+          } else {
+            modelInput.value = '';
+          }
+        }
       } else {
         baseUrlContainer.classList.add('hidden');
+        if (modelContainer) modelContainer.classList.add('hidden');
+        if (modelInput) modelInput.value = '';
       }
       
       const providerKey = localStorage.getItem(`${p}_api_key`) || '';
@@ -1177,6 +1283,9 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
     function loadSettings() {
       const savedProvider = localStorage.getItem('llm_provider') || 'gemini';
       const savedBaseUrl = localStorage.getItem('llm_baseurl') || '';
+      const savedModel = localStorage.getItem('llm_model') || '';
+      const modelInput = document.getElementById('modelInput');
+
       
       providerSelect.value = savedProvider;
       providerSelect.dispatchEvent(new Event('change')); // This will set the API key input correctly
@@ -1218,14 +1327,19 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
 
     saveSettingsBtn.addEventListener('click', () => {
       let modelToSave = 'gemini-2.5-flash';
-      if (providerSelect.value === 'openai') modelToSave = 'gpt-4o';
-      else if (providerSelect.value === 'anthropic') modelToSave = 'claude-3-5-sonnet-20240620';
-      else if (providerSelect.value === 'groq') modelToSave = 'llama-3.3-70b-versatile';
-      else if (providerSelect.value === 'openrouter') modelToSave = 'deepseek/deepseek-r1:free';
-      else if (providerSelect.value === 'custom') modelToSave = 'custom-model';
+      const modelInputVal = document.getElementById('modelInput')?.value.trim();
+      const p = providerSelect.value;
+      if (p === 'openai') modelToSave = 'gpt-4o';
+      else if (p === 'anthropic') modelToSave = 'claude-3-5-sonnet-20240620';
+      else if (p === 'groq') modelToSave = modelInputVal || 'llama-3.3-70b-versatile';
+      else if (p === 'openrouter') modelToSave = modelInputVal || 'meta-llama/llama-3.3-70b-instruct:free';
+      else if (p === 'custom') modelToSave = modelInputVal || 'custom-model';
 
-      localStorage.setItem('llm_provider', providerSelect.value);
+      localStorage.setItem('llm_provider', p);
       localStorage.setItem('llm_model', modelToSave);
+      if (p === 'groq' || p === 'openrouter' || p === 'custom') {
+        localStorage.setItem(p + '_model', modelInputVal);
+      }
       localStorage.setItem('llm_baseurl', baseUrlInput.value.trim());
       localStorage.setItem(`${providerSelect.value}_api_key`, apiKeyInput.value.trim());
       if (providerSelect.value === 'gemini') {
@@ -1407,24 +1521,24 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
 
       workspaceFileTree.innerHTML = '';
       let files = githubTreeCache;
+
+      const SUPPORTED_EXTENSIONS = [
+        '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', 
+        '.h', '.hpp', '.cs', '.go', '.rs', '.php', '.rb', '.swift', 
+        '.kt', '.kts', '.scala', '.sh', '.bash', '.sql', '.html', '.css'
+      ];
+      
+      files = files.filter(f => {
+          const lowerPath = f.path.toLowerCase();
+          return SUPPORTED_EXTENSIONS.some(ext => lowerPath.endsWith(ext));
+      });
       
       if (hideLibsToggle.checked) {
         const hiddenFolders = ['.git/', 'lib/', 'node_modules/', 'vendor/', 'build/', 'bin/', 'target/'];
-        const hiddenExts = ['.pdf', '.png', '.jpg', '.jpeg', '.svg', '.docx', '.xlsx', '.zip', '.gz', '.tar', '.sql', '.db', '.sqlite', '.jar'];
-        const hiddenFiles = ['.gitignore', '.gitattributes', '.gitmodules', '.ds_store'];
-        const codeExts = ['.md', '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', '.h', '.hpp', '.go', '.rs', '.php', '.cs', '.html', '.css', '.scss', '.json', '.yaml', '.yml', '.toml', '.xml', '.sh', '.rb', '.swift', '.kt', '.dart', '.vue', '.svelte', '.astro'];
-        
         files = files.filter(f => {
           const lowerPath = f.path.toLowerCase();
-          const filename = lowerPath.split('/').pop();
-          
           if (hiddenFolders.some(folder => lowerPath.includes(folder))) return false;
-          if (hiddenExts.some(ext => lowerPath.endsWith(ext))) return false;
-          if (hiddenFiles.includes(filename)) return false;
-          if (filename.startsWith('.env')) return false;
-          
-          // Strict code-only (and md)
-          return codeExts.some(ext => lowerPath.endsWith(ext)) || !filename.includes('.'); 
+          return true;
         });
       }
 
@@ -1739,47 +1853,100 @@ When returning the 'prodCode' key, ensure all newlines inside the code string ar
           return;
         }
 
-        const originalText = document.getElementById('exportPdfBtnText').textContent;
-        document.getElementById('exportPdfBtnText').textContent = 'Generating...';
-        exportPdfBtn.classList.add('opacity-50', 'cursor-not-allowed');
+       const reportTitle = "RefactorAI — Executive Refactoring Audit Report";
+       const purposeText = document.getElementById("overviewPurpose")?.innerText || "";
+       const flawsText = document.getElementById("overviewFlaws")?.innerText || "";
+       const approachText = document.getElementById("overviewApproach")?.innerText || "";
+       const productionCode = document.getElementById("productionCode")?.innerText || "";
+       const verificationText = document.getElementById("verificationText")?.innerText || "";
+       const complexityText = document.getElementById("complexityMetric")?.innerText || "O(n)";
+       const activeLang = document.getElementById("langBadge")?.innerText || "CODE";
 
-        // Populate Template
-        document.getElementById('pdfDate').textContent = new Date().toLocaleDateString();
-        document.getElementById('pdfLanguage').textContent = document.getElementById('langBadge').textContent || 'Unknown';
-        document.getElementById('pdfAnalysis').textContent = document.getElementById('analysisText').textContent;
-        document.getElementById('pdfStrategy').innerHTML = document.getElementById('strategyText').innerHTML;
-        document.getElementById('pdfCode').textContent = document.getElementById('productionCode').textContent;
-        document.getElementById('pdfVerification').textContent = document.getElementById('verificationText').textContent;
-        document.getElementById('pdfComplexity').textContent = document.getElementById('complexityMetric').textContent;
+       const printWindow = window.open("", "_blank");
+       printWindow.document.write(`
+         <!DOCTYPE html>
+         <html>
+         <head>
+           <title>${reportTitle}</title>
+           <style>
+             @page { size: A4 portrait; margin: 12mm; }
+             body {
+               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+               background-color: #09090b;
+               color: #f4f4f5;
+               margin: 0;
+               padding: 24px;
+               -webkit-print-color-adjust: exact;
+               print-color-adjust: exact;
+             }
+             .header { border-bottom: 1px solid #27272a; padding-bottom: 12px; margin-bottom: 20px; }
+             .title { font-size: 20px; font-weight: bold; color: #ffffff; margin: 0 0 8px 0; }
+             .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 12px; color: #a1a1aa; margin-top: 10px; }
+             .meta-item strong { color: #f4f4f5; }
+             .section { margin-bottom: 20px; }
+             .section-title { font-size: 13px; font-weight: bold; color: #60a5fa; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
+             .text-block { font-size: 12px; line-height: 1.5; color: #d4d4d8; background: #18181b; padding: 12px; border-radius: 6px; border: 1px solid #27272a; }
+             pre code {
+               font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+               font-size: 11px;
+               line-height: 1.45;
+               white-space: pre-wrap !important;
+               word-break: break-all !important;
+               color: #e4e4e7;
+               display: block;
+               background: #18181b;
+               padding: 12px;
+               border-radius: 6px;
+               border: 1px solid #27272a;
+             }
+           </style>
+         </head>
+         <body>
+           <div class="header">
+             <div class="title">${reportTitle}</div>
+             <div class="meta-grid">
+               <div class="meta-item"><strong>Date:</strong> ${new Date().toLocaleDateString()}</div>
+               <div class="meta-item"><strong>Language:</strong> ${activeLang}</div>
+               <div class="meta-item"><strong>Complexity:</strong> ${complexityText}</div>
+               <div class="meta-item"><strong>Status:</strong> Verified</div>
+             </div>
+           </div>
 
-        const element = document.getElementById('pdfExportContent');
-        const container = document.getElementById('pdfExportContainer');
-        container.classList.remove('hidden');
+           <div class="section">
+             <div class="section-title">1. Overview & Optimization Strategy</div>
+             <div class="text-block" style="margin-bottom: 12px;">
+               <strong>Code Purpose / Use Case:</strong><br> ${purposeText}
+             </div>
+             <div class="text-block" style="margin-bottom: 12px; background: #450a0a; border-color: #7f1d1d; color: #fca5a5;">
+               <strong>Identified Issues & Anti-Patterns:</strong><br> ${flawsText}
+             </div>
+             <div class="text-block">
+               <strong>Refactoring Approach:</strong><br> ${approachText}
+             </div>
+           </div>
 
-        const opt = {
-          margin: [10, 10, 10, 10],
-          filename: 'RefactorAI_Executive_Report.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            scrollY: 0,
-            windowWidth: element.clientWidth
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
+           <div class="section">
+             <div class="section-title">2. Production-Ready Code</div>
+             <pre><code>${productionCode.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>
+           </div>
 
-        html2pdf().set(opt).from(element).save().then(() => {
-          container.classList.add('hidden');
-          document.getElementById('exportPdfBtnText').textContent = originalText;
-          exportPdfBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }).catch(() => {
-          container.classList.add('hidden');
-          document.getElementById('exportPdfBtnText').textContent = originalText;
-          exportPdfBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          alert('Failed to generate PDF.');
-        });
+           <div class="section">
+             <div class="section-title">3. Verification</div>
+             <div class="text-block">${verificationText}</div>
+           </div>
+
+           <script>
+             window.onload = function() {
+               setTimeout(() => {
+                 window.print();
+                 window.close();
+               }, 250);
+             };
+           <\/script>
+         </body>
+         </html>
+       `);
+       printWindow.document.close();
       });
     }
 

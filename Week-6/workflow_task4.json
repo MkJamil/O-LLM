@@ -1,0 +1,83 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "eb427b35-adc7-43d2-ab09-23c23bc09629",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "b87f5e6f-7939-4a0d-ac7b-80031cc7eb1e",
+      "name": "Wait",
+      "webhookId": "fbc05241-9bb2-468e-84b3-1a6b3cf1a88b"
+    },
+    {
+      "parameters": {
+        "url": "https://invalid-domain-test-12345.com",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "1785366a-e28d-44b8-9fad-652f84d5eff4",
+      "name": "HTTP Request",
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ee1efd4c-b08c-4020-b9ef-6b2f5b016e66",
+  "meta": {
+    "instanceId": "779c8829e4841efc7de9a968f15f47611b6bfd254dc82e87a97481aee20309a3"
+  },
+  "nodeGroups": [],
+  "id": "FmM2J2fN38i4n2nM",
+  "tags": []
+}
